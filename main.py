@@ -1,13 +1,12 @@
-import logging
-
-from logging.config import fileConfig
 from fastapi import FastAPI
-from routers.router import ride_router
+from core.configs import settings
+from api.v1.api import api_router
 
-fileConfig('config/logging_config.ini')
-LOGGER = logging.getLogger('sLogger')
+app = FastAPI(title='Watersys - API')
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
-app = FastAPI()
+if __name__ == '__main__':
+    import uvicorn
 
-app.include_router(ride_router)
-
+    uvicorn.run('main:app', host='0.0.0.0', port=8000,
+                log_level='info', reload=True)
