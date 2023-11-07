@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from services.products import ProductService
 from models.products import ProductModel
+from schemas.product import ProductSchema
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.product import ProductAlreadyRegistered
 from exceptions.general_exceptions import ServerException
@@ -19,8 +20,8 @@ router = APIRouter()
 LOGGER = logging.getLogger('sLogger')
 
 
-@router.post('/product',status_code=HTTPStatus.CREATED, response_model=ProductModel)
-async def create_new_product(product: ProductModel):
+@router.post('/product', status_code=HTTPStatus.CREATED, response_model=ProductSchema)
+async def create_new_product(product: ProductSchema):
     try:
         LOGGER.info(f'Starting create new product: {product.descricao}')
         response = await ProductService().create_new_product(product=product, db=get_session)
