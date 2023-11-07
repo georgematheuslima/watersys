@@ -1,0 +1,91 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.background-container {
+    width: 100vw;
+    background-image: url('../img/Rectangle9.png');
+    background-size: cover; /* para ajustar o tamanho da imagem ao componente */
+    background-repeat: no-repeat; /* para evitar repetições da imagem */
+    height: 100vh; /* ajuste a altura conforme necessário */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loginTxt{
+    width: 100%;
+    text-align: start;
+    color: white;
+    margin-left: 6.2rem;
+}
+
+.container_form{
+    /* From https://css.glass */
+    width: 23%;
+    height: 55%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+.containerInput{
+    margin: 30px 0px 30px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.spam{
+   color: #fff;
+}
+
+.inputC{
+    padding: 10px 10px 10px 10px ;
+    border-radius:10px ;
+    border: none;
+    outline: none;
+}
+.Container_button{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0px 20px 0px;
+
+}
+
+.login-button-submit{
+    border: none;
+    outline: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: white;
+    border-radius: 10px;
+}
+
+.Container_Spam{
+    margin: 0px 0px 20px 0px;
+}
+
+.icon{
+    margin-left: 10px;
+}
+
+
+a{
+    color: #1B8CBA;
+}

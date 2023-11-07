@@ -32,28 +32,30 @@ export const SingUp_page:React.FC = () => {
       };
     
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
+    <div className="background-container">
+    <form  className='Form' onSubmit={handleSubmit(onSubmit)}>
+      <div className='containerInput'>
         <label>Nome Completo:</label>
-        <input {...register("nomeCompleto")} />
+        <input className='inputC' {...register("nomeCompleto")} />
         {errors.nomeCompleto && <p>{errors.nomeCompleto.message}</p>}
       </div>
-      <div>
+      <div className='containerInput'>
         <label>CPF:</label>
         <input {...register("cpf")} />
         {errors.cpf && <p>{errors.cpf.message}</p>}
       </div>
-      <div>
+      <div className='containerInput'>
         <label>Endereço:</label>
         <input {...register("endereco")} />
         {errors.endereco && <p>{errors.endereco.message}</p>}
       </div>
-      <div>
+      <div className='containerInput'>
         <label>Contato:</label>
         <input {...register("contato")} />
         {errors.contato && <p>{errors.contato.message}</p>}
       </div>
-      <button type="submit">Enviar</button>
+      <button  className='Container_button' type="submit">Enviar</button>
     </form>
+    </div>
   )
 }

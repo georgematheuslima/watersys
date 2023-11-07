@@ -1,13 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { AiOutlineMail,AiOutlineKey } from "react-icons/ai";
-// import { FcGoogle } from "react-icons/fc";
 import"../scss/Login_Page.scss"
 import * as yup from 'yup';
 import React from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
-// import { Link } from 'react-router-dom';
-
 type IContactFormProps = {
   email?: string;
   password?: string;
@@ -64,7 +61,7 @@ const ButtomCustom = () =>{
                 </div>
             </form>
             <div className='Container_Spam'>
-                <span className='spam'>Não tem uma conta? </span><a href="#">Registre-se Aqui</a>
+                <span className='spam'>Não tem uma conta? </span><a href='/cadastro'>Registre-se Aqui</a>
             </div>
         </div>
   </div>
