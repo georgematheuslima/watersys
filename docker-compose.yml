@@ -8,23 +8,21 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mysql
+      - postgres
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-      MYSQL_DATABASE: mydb
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: watersys
 
-  mysql:
-    image: mysql:latest
-    container_name: meu-mysql
+  postgres:
+    image: postgres:latest
+    container_name: postgres
     environment:
-      MYSQL_ROOT_PASSWORD: admin-root
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: watersys
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - /home/george/Área de Trabalho/watersys/database/data:/var/lib/mysql #substituir pelo caminho da sua maquina
-      - ./initdb:/docker-entrypoint-initdb.d
+      - /home/george/Área de Trabalho/watersys/postgres/data:/var/lib/postgresql/data

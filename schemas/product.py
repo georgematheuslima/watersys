@@ -7,3 +7,4 @@ class ProductSchema(BaseModel):
     unidade_idunidade: int
     valor_compra: Optional[float]
     valor_venda: Optional[float]
+    quantidade: int

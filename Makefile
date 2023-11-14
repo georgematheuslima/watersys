@@ -8,7 +8,7 @@ remove:
 	docker rm $(docker ps -a -q)
 
 up:
-	docker-compose up
+	docker-compose up -d
 
 down:
 	docker-compose down
@@ -23,4 +23,7 @@ rebuild:
 	make down && docker rmi watersys-app && make up
 
 run:
-	docker run --name watersys -d -p 8000:8000 watersys 
+	docker run --name watersys -d -p 8000:8000 watersys
+
+restart:
+	docker-compose down && docker-compose up -d

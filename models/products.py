@@ -11,4 +11,4 @@ class ProductModel(settings.DBBaseModel):
     unidade_idunidade = Column(Integer, name='UNIDADES_IDUNIDADE', nullable=False)
     valor_compra = Column(Float, name='VALORCOMPRA', nullable=True)
     valor_venda = Column(Float, name='VALORVENDA', nullable=True)
-    unidades = relationship("UnidadeModel", backref="produtos")
+    quantidade = Column(Integer, name='QUANTIDAE', nullable=True)
