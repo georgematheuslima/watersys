@@ -5,7 +5,7 @@ from datetime import datetime
 class PurchaseHistorySchema(BaseModel):
     id: Optional[int] = None
     purchased_date: datetime = None
-    user_id: Optional[int] = None
+    customer: int
 
     class Config:
         from_attributes = True
