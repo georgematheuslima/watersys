@@ -5,6 +5,7 @@ type childrenType = {
 }
 type authContextData = {//
 	Login:(email: string, password:string)=> void
+  Registrar:(email: string, password:string, cpf:string, contato:string)=>void
 }
 
 const AuthContext = createContext<authContextData | undefined>(undefined);
@@ -28,8 +29,11 @@ export const AuthProvider:React.FC<childrenType> = ({children}) => {
 		// 	console.log(error)
 		// });
 	}
+  const Registrar =(email: string, password:string, cpf:string, contato:string)=>{
+
+  }
   return (
-    <AuthContext.Provider value={{Login}}>
+    <AuthContext.Provider value={{Login,Registrar}}>
         {children}
     </AuthContext.Provider>
   )
