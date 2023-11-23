@@ -4,11 +4,12 @@ build:
 
 stop:
 	sudo docker stop $(docker ps -q)
+
 remove:
 	docker rm $(docker ps -a -q)
 
 up:
-	docker-compose up -d
+	docker-compose up
 
 down:
 	docker-compose down
@@ -26,4 +27,4 @@ run:
 	docker run --name watersys -d -p 8000:8000 watersys
 
 restart:
-	docker-compose down && docker-compose up -d
+	docker-compose down && docker-compose up

@@ -1,2 +1,3 @@
 from models.purchase_history_model import PurchaseHistoryModel
 from models.user_model import UserModel
+from models.products import ProductModel

@@ -1,4 +1,3 @@
-# from typing import List
 from pydantic.v1 import BaseSettings
 from sqlalchemy.ext.declarative import declarative_base
 from pytz import timezone

@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: watersys
+    ports:
+      - "5432:5432"
+  
   app:
     build:
       context: .
@@ -11,18 +21,14 @@ services:
       - postgres
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_USER: admin
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: watersys
-
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: watersys
-    ports:
-      - "5432:5432"
-    volumes:
-      - /home/george/Área de Trabalho/watersys/postgres/data:/var/lib/postgresql/data
+  
+  script-executor:
+    build:
+      context: .  # Diretório onde o Dockerfile está localizado
+      dockerfile: Dockerfile-script  # Nome do arquivo Dockerfile
+    depends_on:
+      - postgres
+      - app
