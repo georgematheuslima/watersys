@@ -7,8 +7,10 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List
 
+import sqlalchemy.exc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.future import select
 
 from models.products import ProductModel
 from schemas.product import ProductSchema
@@ -45,16 +47,7 @@ async def create_new_product(product: ProductSchema, db: AsyncSession = Depends(
                 session.add(new_product)
                 await session.commit()
                 LOGGER.info('New product was created!')
-                response_data = {
-                                    "message": "Product created successfully",
-                                    "product": {
-                                        "descricao": new_product.descricao,
-                                        "unidade_idunidade": new_product.unidade_idunidade,
-                                        "valor_compra": new_product.valor_compra,
-                                        "valor_venda": new_product.valor_venda,
-                                        "quantidade": new_product.quantidade
-                                    }
-                                }
+                response_data = {"message": "Product created successfully"}
 
                 return JSONResponse(content=response_data, status_code=HTTPStatus.CREATED)
             except IntegrityError as exc:
@@ -99,12 +92,24 @@ async def get_product_by_id(product_id: int, db: AsyncSession = Depends(get_sess
 @router.get('/products', response_model=List[ProductSchema])
 async def get_all_products(db: AsyncSession = Depends(get_session)):
     try:
+        LOGGER.info('Getting All Products in the database')
         async with db as session:
-            products = await session.execute(ProductModel.select())
-            LOGGER.info(f'Products {products}')
-            return products.scalars().all()
-            
+            try:
+                query = select(ProductModel)
+                result = await session.execute(query)
+                products: List[ProductSchema] = result.scalars().all()
+
+                if not products:
+                    raise HTTPException(status_code=HTTPStatus.NO_CONTENT, detail="No products found")
+
+                return products
+
+            except sqlalchemy.exc.SQLAlchemyError as sql_exc:
+                LOGGER.error(f"SQLAlchemy error: {sql_exc}")
+                raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Database error")
+
     except Exception as exc:
+        LOGGER.error(f"Error occurred: {exc}")
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="An error occurred")
 
 @router.put('/product/{id}', status_code=HTTPStatus.OK, response_model=ProductSchema)
@@ -115,7 +120,7 @@ async def update_product(product_id: int, product_data: ProductSchema, db: Async
         async with db as session:
             product = await session.get(ProductModel, product_id)
             if product:
-                for field, value in product_data.dict().items():
+                for field, value in product_data.model_dump().items():
                     setattr(product, field, value)
                 
                 await session.commit()

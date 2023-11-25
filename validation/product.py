@@ -13,9 +13,8 @@ class ProductValidation:
         required_fields = ["descricao", "unidade_idunidade", "valor_compra", "valor_venda", "quantidade"]
         missing_fields = [field for field in required_fields if field not in product_data]
         
-        LOGGER.debug(f'Missing fields: {missing_fields}')
-        
         if missing_fields:
+            LOGGER.debug(f'Missing fields: {missing_fields}')
             missing_fields_str = ", ".join(missing_fields)
             raise ValueError(f"Missing fields: {missing_fields_str}")
         
