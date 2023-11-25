@@ -27,8 +27,8 @@ services:
   
   script-executor:
     build:
-      context: .  # Diretório onde o Dockerfile está localizado
-      dockerfile: Dockerfile-script  # Nome do arquivo Dockerfile
+      context: .
+      dockerfile: Dockerfile-script
     depends_on:
       - postgres
       - app

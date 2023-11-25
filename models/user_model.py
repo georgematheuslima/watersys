@@ -11,10 +11,11 @@ class UserModel(settings.DBBaseModel):
     last_name = Column(String(256), nullable=True)
     email = Column(String(256), index=True, nullable=False, unique=True)
     phone_number = Column(String(10), index=True, nullable=False, unique=True)
-    location = Column(String(256), nullable=False)
+    location = Column(String(256), nullable=True)
     is_admin = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
-    orders = relationship(
+    passwd = Column(String(256), nullable=False)
+    purchases = relationship(
         'PurchaseHistoryModel',
         cascade='all,delete-orphan',
         back_populates='customer',

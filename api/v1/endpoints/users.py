@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from typing import List, Optional, Any
 
@@ -31,29 +32,32 @@ def get_logged(logged_user: UserModel = Depends(get_current_user)):
              response_model=UserSchemaBase)
 async def post_user(user: UserSchemaCreate,
                     db: AsyncSession = Depends(get_session)):
-    LOGGER.info('Iniciando o registro de usuário')
-    
-    new_user = UserModel(name=user.name,
+    LOGGER.info(f'Iniciando o registro de usuário {user}')
+    try:
+        new_user = UserModel(name=user.name,
                          last_name=user.last_name,
                          email=user.email,
                          phone_number=user.phone_number,
                          passwd=generate_hast_pass(user.passwd),
                          is_admin=user.is_admin)
-    async with db as session:
-        try:
-            LOGGER.info('Registrando usuário no banco de dados')
-            session.add(new_user)
-            await session.commit()
-            
-            LOGGER.info('Usuário registrado com sucesso')
-            return new_user
-        except IntegrityError as e:
-            LOGGER.error(f'Erro de integridade ao criar usuário: {e}')
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                                detail='Usuário com o mesmo email já existente')
 
-        except Exception as e:
-            LOGGER.error(f'Erro interno ao criar usuário: {e}')
+        async with db as session:
+            try:
+                LOGGER.info('Registrando usuário no banco de dados')
+                session.add(new_user)
+                await session.commit()
+                
+                LOGGER.info('Usuário registrado com sucesso')
+                return new_user
+            except IntegrityError as exc:
+                LOGGER.error(traceback.format_exc())
+                LOGGER.error(f'Erro de integridade ao criar usuário: {exc}')
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                    detail='Usuário com o mesmo email já existente')
+
+    except Exception as exc:
+            LOGGER.error(traceback.format_exc())
+            LOGGER.error(f'Erro interno ao criar usuário: {exc}', exc_info=True)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail='Erro interno ao processar a requisição')
 

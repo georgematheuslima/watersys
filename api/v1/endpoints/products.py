@@ -1,7 +1,7 @@
 import logging
 import traceback
-
 from http import HTTPStatus
+
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -12,13 +12,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.future import select
 
-from models.products import ProductModel
-from schemas.product import ProductSchema
+from models.products_model import ProductModel
+from schemas.product_schema import ProductSchema
 from validation.product import ProductValidation
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.product import ProductAlreadyRegistered
 from exceptions.general_exceptions import ServerException
-from utils.system_messages.system_messages import (FIELD_VALUE_LESS_THAN_ZERO)
 from utils.system_messages.product.product_messages import(PRODUCT_ALREADY_REGISTERED)
 
 from core.deps import get_session
