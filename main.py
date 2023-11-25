@@ -3,7 +3,7 @@ from logging.config import fileConfig
 
 from fastapi import FastAPI
 from core.configs import settings
-from router.user_router import api_router
+from router.routers import api_router
 
 fileConfig('config/logging_config.ini')
 LOGGER = logging.getLogger('sLogger')
