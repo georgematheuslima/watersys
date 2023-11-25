@@ -61,7 +61,7 @@ const ButtomCustom = () =>{
                 </div>
             </form>
             <div className='Container_Spam'>
-                <span className='spam'>Cadastrar Usuário</span><a href='/cadastroUsuario'>Cadastrar Usuário</a>
+                <span className='spam'>Cadastrar Usuário</span><a href='/cadastroUsuario'>Aqui</a>
             </div>
         </div>
   </div>

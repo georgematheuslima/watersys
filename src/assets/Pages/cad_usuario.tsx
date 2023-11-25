@@ -10,7 +10,7 @@ type IContactFormProps = {
     name?: string;
     last_name?: string;
     email?:string;
-    contato?:string;
+     phone_number?:string;
     password:string;
     is_admin?:boolean;
 }
@@ -19,14 +19,14 @@ interface  IContactFormDTO{
     name?: string;
     last_name?: string;
     email?:string;
-    contato?:string;
+     phone_number?:string;
     password:string;
   }
 
 const contactSchema= yup.object().shape({
   email: yup.string().required(),
   password: yup.string().required(),
-  contato:yup.string().required(),
+   phone_number:yup.string().required(),
   name:yup.string().required(),
   last_name:yup.string().required(),
   is_admin:yup.boolean()
@@ -43,7 +43,7 @@ export const Cadastro_Usuario:React.FC = () => {
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
-    RegistrarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data.contato),Boolean(data.is_admin))
+    RegistrarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data. phone_number),Boolean(data.is_admin))
      console.log(data)
   };
   
@@ -62,13 +62,13 @@ const ButtomCustom = () =>{
 
                 <div className='containerInput'>
                     <AiTwotoneSchedule  style={{color:"gray"}} className='icon' size={24}/>
-                    <input  className='inputC' type="text" placeholder=' Nome' {...register('name')}/>
+                    <input  className='inputC' type="text" placeholder='  name' {...register('name')}/>
                 </div>
                 {errors.name && <span className='errorSpan01'>Preencha todos os campos</span>}
 
                 <div className='containerInput'>
                     <AiTwotoneSchedule  style={{color:"gray"}} className='icon' size={24}/>
-                    <input  className='inputC' type="text" placeholder=' Ultimo Nome' {...register('last_name')}/>
+                    <input  className='inputC' type="text" placeholder=' Ultimo  name' {...register('last_name')}/>
                 </div>
                 {errors.last_name && <span className='errorSpan01'>Preencha todos os campos</span>}
 
@@ -86,9 +86,9 @@ const ButtomCustom = () =>{
 
                 <div className='containerInput'>
                     <AiOutlinePhone  style={{color:"gray"}} className='icon' size={24}/>
-                    <input  className='inputC' type="number" placeholder=' Contato' {...register('contato')}/>
+                    <input  className='inputC' type="number" placeholder='  Contato' {...register('phone_number')}/>
                 </div>
-                {errors.contato && <span className='errorSpan01'>Preencha todos os campos</span>}
+                {errors. phone_number && <span className='errorSpan01'>Preencha todos os campos</span>}
 
                 <div className='containerCheckbox '>
                     <input type="checkbox" id="is_admin" className="checkboxStyle" {...register('is_admin')}/>
