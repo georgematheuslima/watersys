@@ -7,14 +7,18 @@ type childrenType = {
 
 
 type authContextData = {//
-  //usuario
+  //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,  phone_number:string, password:string,is_admin:boolean )=>void
   GetUsuario:(userId: string)=>void
   DeleteUsuario:(userId: string)=>void
-    //cliente
+  //-------------------cliente---------------------
   RegistrarCliente:(email: string, password:string, cpf:string,  phone_number:string)=>void
-    //produto
+  //------------------produto---------------------
+  RegistrarProduto:( descricao: string, unidade_idunidade:number, valor_compra:number,  valor_venda:number, quantidade:number)=>void
+  GetProduto:(produtoId: number)=>void
+  AtualizarProduto:(produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number)=>void
+  DeletarProduto:(produtoId: number)=>void
 }
 
 const AuthContext = createContext<authContextData | undefined>(undefined);
@@ -115,8 +119,57 @@ const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, va
       console.error('Erro ao registrar produto:', error.response ? error.response.data : error);
   }
 }
+
+const GetProduto = async (produtoId: number) => {
+  try {
+      const response = await axios.get(`http://localhost:8000/api/v1/products/product/${produtoId}`);
+      console.log('Dados do produto:', response.data);
+  } catch (error: any) {
+      console.error('Erro ao buscar produto:', error.response ? error.response.data : error);
+  }
+}
+
+const AtualizarProduto = async (produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number) => {
+  try {
+      const response = await axios.put(`http://localhost:8000/api/v1/products/product/${produtoId}`, {
+          descricao,
+          unidade_idunidade,
+          valor_compra,
+          valor_venda,
+          quantidade
+      });
+      console.log('Produto atualizado com sucesso:', response.data);
+  } catch (error: any) {
+      console.error('Erro ao atualizar produto:', error.response ? error.response.data : error);
+  }
+
+}
+
+const DeletarProduto = async (produtoId: number) => {
+  try {
+      const response = await axios.delete(`http://localhost:8000/api/v1/products/product/${produtoId}`);
+      console.log('Produto deletado com sucesso:', response.data);
+  } catch (error: any) {
+      console.error('Erro ao deletar produto:', error.response ? error.response.data : error);
+  }
+}
+
+
+
+
+
+
   return (
-    <AuthContext.Provider value={{Login,RegistrarCliente, RegistrarUsuario,GetUsuario,DeleteUsuario}}>
+    <AuthContext.Provider value={{Login,
+    RegistrarCliente, 
+    RegistrarUsuario,
+    GetUsuario,
+    DeleteUsuario,
+    RegistrarProduto,
+    GetProduto,
+    AtualizarProduto,
+    DeletarProduto
+    }}>
         {children}
     </AuthContext.Provider>
   )
