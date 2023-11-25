@@ -5,36 +5,32 @@ import"../scss/Login_Page.scss"
 import * as yup from 'yup';
 import React from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
-
 type IContactFormProps = {
-    name?: string;
-    last_name?: string;
-    email?:string;
-    contato?:string;
-    password:string;
-    is_admin?:boolean;
+  email?: string;
+  password?: string;
+  cpf?:string;
+  contato:string;
 }
 
 interface  IContactFormDTO{
-    name?: string;
-    last_name?: string;
-    email?:string;
+    email?: string;
+    password?: string;
+    cpf?:string;
     contato?:string;
-    password:string;
   }
 
 const contactSchema= yup.object().shape({
   email: yup.string().required(),
   password: yup.string().required(),
   contato:yup.string().required(),
-  name:yup.string().required(),
-  last_name:yup.string().required(),
-  is_admin:yup.boolean()
+  cpf:yup.string().required(),
+
+
 });
 
 
-export const Cadastro_Usuario:React.FC = () => {
-	const {RegistrarUsuario} = useAuth()
+export const Cadastro_page:React.FC = () => {
+	const {RegistrarCliente} = useAuth()
   const { register, handleSubmit, formState } = useForm({
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
@@ -43,8 +39,9 @@ export const Cadastro_Usuario:React.FC = () => {
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
-    RegistrarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data.contato),Boolean(data.is_admin))
-     console.log(data)
+    RegistrarCliente(String(data.email), String(data.password),String(data.cpf), String(data.contato))
+    // console.log(data)
+    
   };
   
 const ButtomCustom = () =>{
@@ -57,21 +54,8 @@ const ButtomCustom = () =>{
   return (
     <div className="background-container">
         <div  className='container_form'>
-            <h1 className='loginTxt'>Cadastrar Usuário</h1>
+            <h1 className='loginTxt'>Cadastrar Cliente</h1>
             <form className='Form' onSubmit={handleSubmit(onSubmit)} >
-
-                <div className='containerInput'>
-                    <AiTwotoneSchedule  style={{color:"gray"}} className='icon' size={24}/>
-                    <input  className='inputC' type="text" placeholder=' Nome' {...register('name')}/>
-                </div>
-                {errors.name && <span className='errorSpan01'>Preencha todos os campos</span>}
-
-                <div className='containerInput'>
-                    <AiTwotoneSchedule  style={{color:"gray"}} className='icon' size={24}/>
-                    <input  className='inputC' type="text" placeholder=' Ultimo Nome' {...register('last_name')}/>
-                </div>
-                {errors.last_name && <span className='errorSpan01'>Preencha todos os campos</span>}
-
                 <div className='containerInput'>
                     <AiOutlineMail  style={{color:"gray"}} className='icon' size={24}/>
                     <input  className='inputC' type="email" placeholder=' Email' {...register('email')}  />
@@ -85,15 +69,17 @@ const ButtomCustom = () =>{
                 {errors.password && <span className='errorSpan01'>Preencha todos os campos</span>}
 
                 <div className='containerInput'>
+                    <AiTwotoneSchedule  style={{color:"gray"}} className='icon' size={24}/>
+                    <input  className='inputC' type="number" placeholder=' CPF' {...register('cpf')}/>
+                </div>
+                {errors.cpf && <span className='errorSpan01'>Preencha todos os campos</span>}
+
+                <div className='containerInput'>
                     <AiOutlinePhone  style={{color:"gray"}} className='icon' size={24}/>
                     <input  className='inputC' type="number" placeholder=' Contato' {...register('contato')}/>
                 </div>
                 {errors.contato && <span className='errorSpan01'>Preencha todos os campos</span>}
 
-                <div className='containerCheckbox '>
-                    <input type="checkbox" id="is_admin" className="checkboxStyle" {...register('is_admin')}/>
-                    <label htmlFor="is_admin">Acesso de Administrador</label>
-                </div>
 
                 <div className='Container_button'>
                     <ButtomCustom />
