@@ -1,6 +1,12 @@
+import logging
+from logging.config import fileConfig
+
 from fastapi import FastAPI
 from core.configs import settings
-from api.v1.api import api_router
+from router.user_router import api_router
+
+fileConfig('config/logging_config.ini')
+LOGGER = logging.getLogger('sLogger')
 
 app = FastAPI(title='Watersys - API')
 app.include_router(api_router, prefix=settings.API_V1_STR)

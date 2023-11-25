@@ -1,3 +1,5 @@
+import logging
+
 from typing import List, Optional, Any
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response
@@ -16,6 +18,7 @@ from core.auth import authenticate, create_access_token
 
 
 router = APIRouter()
+LOGGER = logging.getLogger('sLogger')
 
 
 @router.get('/logged', response_model=UserSchemaBase)
@@ -23,28 +26,36 @@ def get_logged(logged_user: UserModel = Depends(get_current_user)):
     return logged_user
 
 
-# Signup
 @router.post('/signup',
              status_code=status.HTTP_201_CREATED,
              response_model=UserSchemaBase)
 async def post_user(user: UserSchemaCreate,
                     db: AsyncSession = Depends(get_session)):
-    new_user: UserModel = UserModel(name=user.name,
-                                    last_name=user.last_name,
-                                    email=user.email,
-                                    phone_number=user.phone_number,
-                                    passwd=generate_hast_pass(user.passwd),
-                                    is_admin=user.is_admin)
+    LOGGER.info('Iniciando o registro de usuário')
+    
+    new_user = UserModel(name=user.name,
+                         last_name=user.last_name,
+                         email=user.email,
+                         phone_number=user.phone_number,
+                         passwd=generate_hast_pass(user.passwd),
+                         is_admin=user.is_admin)
     async with db as session:
         try:
+            LOGGER.info('Registrando usuário no banco de dados')
             session.add(new_user)
             await session.commit()
-
+            
+            LOGGER.info('Usuário registrado com sucesso')
             return new_user
-        except IntegrityError:
+        except IntegrityError as e:
+            LOGGER.error(f'Erro de integridade ao criar usuário: {e}')
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                 detail='Usuário com o mesmo email já existente')
 
+        except Exception as e:
+            LOGGER.error(f'Erro interno ao criar usuário: {e}')
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail='Erro interno ao processar a requisição')
 
 @router.get('/', response_model=List[UserSchemaBase])
 async def get_users(db: AsyncSession = Depends(get_session)):

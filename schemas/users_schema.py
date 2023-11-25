@@ -8,7 +8,7 @@ class UserSchemaBase(BaseModel):
     name: str
     last_name: str
     email: EmailStr
-    phone_number: Optional[int] = None
+    phone_number: Optional[str] = None
     is_admin: bool = False
 
     class Config:

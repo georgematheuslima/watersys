@@ -1,0 +1,12 @@
+FROM python:3.11.2-slim-bullseye
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+
+COPY make_tables.py /app/make_tables.py
+
+COPY . .
+
+CMD ["bash", "-c", "sleep 5 && python3 /app/make_tables.py"]
