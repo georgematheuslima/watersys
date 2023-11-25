@@ -1,0 +1,8 @@
+# POSTGRESS
+
+docker pull postgres
+docker run --name watersys-postgres -e POSTGRES_PASSWORD=123 -d -p 5432:5432 postgres
+docker exec -it watersys-postgres /bin/bash
+psql -U postgres
+CREATE DATABASE watersys;
+GRANT ALL PRIVILEGES ON DATABASE watersys TO postgres;
