@@ -49,6 +49,19 @@
     border-radius: 5px;
 }
 
+.containerCheckbox {
+    padding: 0.4em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.checkboxStyle {
+    margin-right: 10px; /* Ajuste este valor conforme necessário */
+}
+
 .spam{
    color: #fff;
 }
@@ -88,4 +101,16 @@
 
 a{
     color: #1B8CBA;
+}
+
+@media (max-width: 1173px) {
+    
+
+    .loginTxt {
+        margin-left: 0.8rem; /* Reduz a margem esquerda */
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    /* Outros ajustes específicos para telas menores */
 }
