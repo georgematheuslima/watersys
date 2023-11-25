@@ -6,8 +6,6 @@ __pycache__/
 mongodb
 .volumes
 logs
-<<<<<<< HEAD
 .env
-=======
 database
->>>>>>> master
+
