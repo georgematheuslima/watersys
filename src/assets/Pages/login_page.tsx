@@ -5,6 +5,7 @@ import"../scss/Login_Page.scss"
 import * as yup from 'yup';
 import React from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
+import { useNavigate } from 'react-router-dom';
 type IContactFormProps = {
   email?: string;
   password?: string;
@@ -22,15 +23,15 @@ export const Login_page:React.FC = () => {
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
   });
+  const navigate = useNavigate();
 
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
     Login(String(data.email), String(data.password))
-    // console.log(data)
-    
+    navigate("/verifyUser/dashboard")  
   };
-  
+ 
 const ButtomCustom = () =>{
   return(
     <div>

@@ -36,18 +36,20 @@ export const AuthProvider:React.FC<childrenType> = ({children}) => {
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
 	const Login = async (email: string, password:string) => {
-      console.log(email, password)
       try {
         const response = await axios.post('http://localhost:8000/api/v1/users/login', {
-            username: email,
-            password: password
+          username: email,
+          password: password,
         }, {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded', 'accept': 'application/json'
             }
         });
-
-        console.log('Login bem-sucedido:', response.data);
+        if(response.data){
+          const token = response.data.access_token;
+          localStorage.setItem('access_token', token);
+        }
+       
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             console.error('Erro na resposta:', error.response.data);
@@ -58,17 +60,19 @@ export const AuthProvider:React.FC<childrenType> = ({children}) => {
 	}
 
   const RegistrarUsuario = async ( name: string, last_name:string, email:string,  phone_number:string, password:string,is_admin:boolean)=>{
-      
     try {
         const response = await axios.post('http://localhost:8000/api/v1/users/signup', {
             name: name,
             last_name: last_name,
             email: email,
             phone_number: phone_number,
+            is_admin: is_admin,
             passwd: password,
-            is_admin: is_admin
-        });
-        console.log(response.data);
+        }, {
+          headers: {
+              'Content-Type': 'application/json', 'accept': 'application/json'
+          }
+      });
     } catch (error:any) {
         console.error('Erro ao registrar usuário:', error.response ? error.response.data : error);
     }

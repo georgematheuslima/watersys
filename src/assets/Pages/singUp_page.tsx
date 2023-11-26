@@ -36,7 +36,7 @@ export const SingUp_page:React.FC = () => {
     <form  className='Form' onSubmit={handleSubmit(onSubmit)}>
       <div className='containerInput'>
         <label> name Completo:</label>
-        <input className='inputC' {...register(" nameCompleto")} />
+        <input className='inputC' {...register("nameCompleto")} />
         {errors. nameCompleto && <p>{errors. nameCompleto.message}</p>}
       </div>
       <div className='containerInput'>
@@ -51,7 +51,7 @@ export const SingUp_page:React.FC = () => {
       </div>
       <div className='containerInput'>
         <label> phone_number:</label>
-        <input {...register(" phone_number")} />
+        <input {...register("phone_number")} />
         {errors. phone_number && <p>{errors. phone_number.message}</p>}
       </div>
       <button  className='Container_button' type="submit">Enviar</button>
