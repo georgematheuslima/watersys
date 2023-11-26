@@ -1,5 +1,5 @@
-import axios from 'axios';
-import React, { createContext, useContext,ReactNode, FC, useState  } from 'react';
+import axios, { AxiosResponse } from 'axios';
+import { createContext, useContext,ReactNode, FC, useState  } from 'react';
 // import { axiosInstance } from '../services/Api';
 type childrenType = {
     children: ReactNode
@@ -11,8 +11,9 @@ type authContextData = {//
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
   GetUsuario:(userId: string)=>void
-  GetAllUsuario:()=>void
-  DeleteUsuario:(userId: string)=>void
+  GetAllUsuario:() => Promise<AxiosResponse<any>>;
+  DeleteUsuario:(userId: number)=>void
+  EditarUsuario:(name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean, userId:number)=>void
   //-------------------cliente---------------------
   RegistrarCliente:(email: string, password:string, cpf:string,  phone_number:string)=>void
   //------------------produto---------------------
@@ -33,7 +34,6 @@ export const useAuth = () => {
   };
 export const AuthProvider:FC<childrenType> = ({children}) => {
 
-  const [usuarios, setUsuarios] = useState([]);
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
 	const Login = async (email: string, password:string) => {
@@ -79,10 +79,30 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
     }
   }
 
+  const EditarUsuario = async ( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean, userId:number)=>{
+    try {
+        const response = await axios.put(`http://localhost:8000/api/v1/users/${userId}`, {
+            name: name,
+            last_name: last_name,
+            email: email,
+            phone_number: phone_number,
+            is_admin: is_admin,
+            passwd: password,
+        }, {
+          headers: {
+              'Content-Type': 'application/json', 'accept': 'application/json'
+          }
+      });
+    } catch (error:any) {
+        console.error('Erro ao Editar usuário:', error.response ? error.response.data : error);
+    }
+  }
+
   const GetUsuario = async (userId: string) => {
     try {
         const response = await axios.get(`http://localhost:8000/api/v1/users/${userId}`);
         console.log('Dados do usuário:', response.data);
+        return response;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             console.error('Erro ao buscar usuário:', error.response.data);
@@ -90,11 +110,11 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
             console.error('Erro na requisição:', error);
         }
     }
-
-  const GetAllUsuario = async () => {
+  }
+  const GetAllUsuario = async () =>{
     try {
-        const response = await axios.get("http://localhost:8000/api/v1/users");
-        setUsuarios(response.data);
+      const response = await axios.get("http://localhost:8000/api/v1/users");
+      return response;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             console.error('Erro ao buscar usuário:', error.response.data);
@@ -104,7 +124,7 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
       }
   }
 
-const DeleteUsuario = async (userId: string) => {
+const DeleteUsuario = async (userId: number) => {
   try {
       const response = await axios.delete(`http://localhost:8000/api/v1/users/${userId}`);
       console.log('Usuário deletado com sucesso:', response.data);
@@ -177,12 +197,14 @@ const DeletarProduto = async (produtoId: number) => {
 
 
   return (
-    <AuthContext.Provider value={{Login,
+    <AuthContext.Provider value={{
+    Login,
     RegistrarCliente, 
     RegistrarUsuario,
     GetUsuario,
     GetAllUsuario,
     DeleteUsuario,
+    EditarUsuario,
     RegistrarProduto,
     GetProduto,
     AtualizarProduto,
@@ -191,4 +213,4 @@ const DeletarProduto = async (produtoId: number) => {
         {children}
     </AuthContext.Provider>
   );
-};}
+};

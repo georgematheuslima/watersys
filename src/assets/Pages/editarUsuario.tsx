@@ -5,6 +5,7 @@ import"../scss/Login_Page.scss"
 import * as yup from 'yup';
 import React from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
+import { useParams } from 'react-router-dom';
 
 type IContactFormProps = {
     name?: string;
@@ -14,6 +15,7 @@ type IContactFormProps = {
     password:string;
     is_admin?:boolean;
 }
+
 const contactSchema= yup.object().shape({
   email: yup.string().required(),
   password: yup.string().required(),
@@ -24,17 +26,17 @@ const contactSchema= yup.object().shape({
 });
 
 
-export const Cadastro_Usuario:React.FC = () => {
-	const {RegistrarUsuario} = useAuth()
+export const Editar_Usuario:React.FC = () => {
+    const {EditarUsuario} = useAuth()
   const { register, handleSubmit, formState } = useForm({
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
   });
-
+  const { userId } = useParams();
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
-    RegistrarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data. phone_number),Boolean(data.is_admin))
+    EditarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data. phone_number),Boolean(data.is_admin), Number((userId)))
      console.log(data)
   };
   
@@ -48,7 +50,7 @@ const ButtomCustom = () =>{
   return (
     <div className="background-container">
         <div  className='container_form'>
-            <h1 className='loginTxt'>Cadastrar Usuário</h1>
+            <h1 className='loginTxt'>Editar Usuário</h1>
             <form className='Form' onSubmit={handleSubmit(onSubmit)} >
 
                 <div className='containerInput'>
