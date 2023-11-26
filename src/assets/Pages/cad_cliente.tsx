@@ -39,9 +39,7 @@ export const Cadastro_page:React.FC = () => {
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
-    RegistrarCliente(String(data.email), String(data.password),String(data.cpf), String(data. phone_number))
-    // console.log(data)
-    
+    RegistrarCliente(String(data.email), String(data.password),String(data.cpf), String(data. phone_number))    
   };
   
 const ButtomCustom = () =>{

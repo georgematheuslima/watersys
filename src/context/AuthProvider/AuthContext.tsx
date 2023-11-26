@@ -1,16 +1,17 @@
 import axios from 'axios';
-import React, { createContext, useContext  } from 'react';
+import React, { createContext, useContext,ReactNode, FC, useState  } from 'react';
 // import { axiosInstance } from '../services/Api';
 type childrenType = {
-    children: React.ReactNode
+    children: ReactNode
 }
 
 
 type authContextData = {//
   //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
-  RegistrarUsuario:( name: string, last_name:string, email:string,  phone_number:string, password:string,is_admin:boolean )=>void
+  RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
   GetUsuario:(userId: string)=>void
+  GetAllUsuario:()=>void
   DeleteUsuario:(userId: string)=>void
   //-------------------cliente---------------------
   RegistrarCliente:(email: string, password:string, cpf:string,  phone_number:string)=>void
@@ -30,9 +31,9 @@ export const useAuth = () => {
     }
     return context;
   };
-export const AuthProvider:React.FC<childrenType> = ({children}) => {
+export const AuthProvider:FC<childrenType> = ({children}) => {
 
-
+  const [usuarios, setUsuarios] = useState([]);
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
 	const Login = async (email: string, password:string) => {
@@ -59,7 +60,7 @@ export const AuthProvider:React.FC<childrenType> = ({children}) => {
     }
 	}
 
-  const RegistrarUsuario = async ( name: string, last_name:string, email:string,  phone_number:string, password:string,is_admin:boolean)=>{
+  const RegistrarUsuario = async ( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean)=>{
     try {
         const response = await axios.post('http://localhost:8000/api/v1/users/signup', {
             name: name,
@@ -89,7 +90,19 @@ export const AuthProvider:React.FC<childrenType> = ({children}) => {
             console.error('Erro na requisição:', error);
         }
     }
-}
+
+  const GetAllUsuario = async () => {
+    try {
+        const response = await axios.get("http://localhost:8000/api/v1/users");
+        setUsuarios(response.data);
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            console.error('Erro ao buscar usuário:', error.response.data);
+        } else {
+            console.error('Erro na requisição:', error);
+        }
+      }
+  }
 
 const DeleteUsuario = async (userId: string) => {
   try {
@@ -168,6 +181,7 @@ const DeletarProduto = async (produtoId: number) => {
     RegistrarCliente, 
     RegistrarUsuario,
     GetUsuario,
+    GetAllUsuario,
     DeleteUsuario,
     RegistrarProduto,
     GetProduto,
@@ -176,5 +190,5 @@ const DeletarProduto = async (produtoId: number) => {
     }}>
         {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};}
