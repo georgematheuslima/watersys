@@ -4,7 +4,6 @@ from schemas.purchase_history_schema import PurchaseHistorySchema
 
 
 class UserSchemaBase(BaseModel):
-    id: Optional[int] = None
     name: str
     last_name: str
     email: EmailStr

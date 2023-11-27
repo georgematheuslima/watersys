@@ -7,3 +7,11 @@ class ProductSchema(BaseModel):
     valor_compra: Optional[float]
     valor_venda: Optional[float]
     quantidade: int
+
+class ProductSchemaReturn(BaseModel):
+    id: int
+    descricao: str
+    unidade_idunidade: int
+    valor_compra: Optional[float]
+    valor_venda: Optional[float]
+    quantidade: int

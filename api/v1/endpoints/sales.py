@@ -11,6 +11,7 @@ from sqlalchemy import select
 from core.deps import get_session
 from models.sales_model import SaleModel
 from models.client_model import ClientModel
+from models.products_model import ProductModel
 from schemas.sale_schema import SaleCreate, Sale
 
 router = APIRouter()
@@ -29,25 +30,53 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
             if not found_client:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Client not found')
 
-            new_sale = SaleModel(**sale.model_dump(), customer_id=found_client.id)
+            product_query = select(ProductModel).where(ProductModel.id == sale.product_id)
+            product = await session.execute(product_query)
+            found_product = product.scalars().first()
+
+            if not found_product:
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Product not found')
+
+            if found_product.quantidade < sale.quantity:
+                raise HTTPException(status_code=HTTPStatus.BAD_REQUEST,
+                                    detail='Insufficient quantity in stock')
+
+            # Calculando o total_amount com base no quantity e valor_venda do produto
+            total_amount = sale.quantity * found_product.valor_venda
+
+            new_sale = SaleModel(
+                quantity=sale.quantity,
+                total_amount=total_amount,  # Atualizando total_amount com o cálculo
+                purchase_date=sale.purchase_date,
+                returnable=sale.returnable,
+                product_id=sale.product_id,
+                cpf=sale.cpf
+            )
+
+            new_sale.customer = found_client
+
+            found_product.quantidade -= sale.quantity
 
             LOGGER.info('Registering sale in the database')
             session.add(new_sale)
             await session.commit()
             LOGGER.info('Sale registered successfully')
-            return new_sale
+
+            return {"Message": f"Sale registered. Sale price {new_sale.total_amount}"}
 
     except IntegrityError as exc:
         LOGGER.error(traceback.format_exc())
         LOGGER.error(f'Integrity error creating sale: {exc}')
         raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE,
                             detail='Integrity error creating sale')
+    except HTTPException as exc:
+        LOGGER.error(f'Error creating sale: {exc.detail}')
+        raise  
     except Exception as exc:
         LOGGER.error(traceback.format_exc())
         LOGGER.error(f'Internal error creating sale: {exc}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Internal error processing request')
-    
 
 @router.get('/sales', response_model=list[Sale])
 async def get_sales(db: AsyncSession = Depends(get_session)):

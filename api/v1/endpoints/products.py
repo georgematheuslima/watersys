@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.future import select
 
 from models.products_model import ProductModel
-from schemas.product_schema import ProductSchema
+from schemas.product_schema import ProductSchema, ProductSchemaReturn
 from validation.product import ProductValidation
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.product import ProductAlreadyRegistered
@@ -88,7 +88,7 @@ async def get_product_by_id(product_id: int, db: AsyncSession = Depends(get_sess
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": f'An error occurred {exc}'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-@router.get('/products', response_model=List[ProductSchema])
+@router.get('/products', response_model=List[ProductSchemaReturn])
 async def get_all_products(db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info('Getting All Products in the database')
@@ -96,7 +96,7 @@ async def get_all_products(db: AsyncSession = Depends(get_session)):
             try:
                 query = select(ProductModel)
                 result = await session.execute(query)
-                products: List[ProductSchema] = result.scalars().all()
+                products: List[ProductSchemaReturn] = result.scalars().all()
 
                 if not products:
                     raise HTTPException(status_code=HTTPStatus.NO_CONTENT, detail="No products found")
