@@ -5,11 +5,22 @@ type childrenType = {
     children: ReactNode
 }
 
+type Iaddress={
+  address: string,
+  type: string,
+  state: string,
+  abbreviation: string,
+  city: string,
+  neighborhood: string,
+  reference_point: string
+}
 
 type authContextData = {//
   cadastroUserStatus:boolean;
   EditarUserStatus:boolean;
   cadastroProdutoStatus:boolean;
+  cadastroClienteStatus:boolean;
+  EditarClienteStatus:boolean;
   //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
@@ -18,7 +29,11 @@ type authContextData = {//
   DeleteUsuario:(userId: number)=>void
   EditarUsuario:(name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean, userId:number)=>void
   //-------------------cliente---------------------
-  RegistrarCliente:(email: string, password:string, cpf:string,  phone_number:string)=>void
+  RegistrarCliente:(client_first_name: string, client_last_name:string, cpf:string, phone_number:string, email:string, address:Iaddress)=>void
+  GetAllCliente:()=>void
+  GetCliente:(clienteId:number)=>void
+  AtualizarCliente:(cliente_id:number,client_first_name: string, client_last_name:string, cpf:string, phone_number:string, email:string, address:Iaddress)=>void
+  DeletarCliente:(clienteId:number)=>void
   //------------------produto---------------------
   RegistrarProduto:( descricao: string, unidade_idunidade:number, valor_compra:number,  valor_venda:number, quantidade:number)=>void
   GetProduto:(produtoId: number)=>void
@@ -42,6 +57,9 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
 
   const [cadastroProdutoStatus, setcadastroProdutoStatus] = useState(false);
   const [EditarProdutoStatus, setEditarProdutoStatus] = useState(false);
+
+  const [cadastroClienteStatus, setcadastroClienteStatus] = useState(false);
+  const [EditarClienteStatus, setEditarClienteStatus] = useState(false);
 
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
@@ -148,8 +166,82 @@ const DeleteUsuario = async (userId: number) => {
   }
 }
 //_-------------------------------------------CLIENTE-------------------------------------------------//
-const RegistrarCliente =(email: string, password:string, cpf:string,  phone_number:string)=>{
-  console.log("AQUI");
+
+const RegistrarCliente =async (client_first_name: string, client_last_name:string, cpf:string, phone_number:string, email:string, address:Iaddress)=>{
+  try{
+    const response = await axios.post('http://localhost:8000/api/v1/client/client',{
+    client_first_name:client_first_name,
+      client_last_name:client_last_name,
+      cpf:cpf,
+      phone_number:phone_number,
+      email:email,
+      address:address
+    },{
+      headers: {
+          'Content-Type': 'application/json', 'accept': 'application/json'
+      }
+    })
+
+  }catch(error:any){
+    setcadastroClienteStatus(true);
+    console.error('Erro ao registrar produto:', error.response ? error.response.data : error);
+  }
+}
+
+const GetAllCliente = async ()=>{
+  try {
+    const response = await axios.get("http://localhost:8000/api/v1/client/clients",{});
+    return response;
+  } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+          console.error('Erro ao buscar Produtos:', error.response.data);
+      } else {
+          console.error('Erro na requisição:', error);
+      }
+    }
+}
+
+const GetCliente = async (clienteId: number) => {
+  try {
+      const response = await axios.get(`http://localhost:8000/api/v1/client/client/{id}?client_id=${clienteId}`);
+      console.log('Dados do Cliente:', response.data);
+      return response
+  } catch (error: any) {
+      console.error('Erro ao buscar cliente:', error.response ? error.response.data : error);
+  }
+}
+
+const AtualizarCliente = async (cliente_id:number,client_first_name: string, client_last_name:string, cpf:string, phone_number:string, email:string, address:Iaddress) => {
+  try {
+      const response = await axios.put(`http://localhost:8000/api/v1/client/client/{id}?client_id=${cliente_id}`, {
+        client_first_name:client_first_name,
+      client_last_name:client_last_name,
+      cpf:cpf,
+      phone_number:phone_number,
+      email:email,
+      address:address
+      },{
+        headers: {
+            'Content-Type': 'application/json', 'accept': 'application/json'
+        }
+    });
+      console.log('Produto atualizado com sucesso:', response.data);
+  } catch (error: any) {
+    setEditarClienteStatus(true);
+      console.error('Erro ao atualizar produto:', error.response ? error.response.data : error);
+  }
+
+}
+
+
+const DeletarCliente = async (cliente_id: number) => {
+  try {
+      const response = await axios.delete(`http://localhost:8000/api/v1/client/client/{id}?client_id=${cliente_id}`,{
+      });
+      console.log('Cliente deletado com sucesso:', response.data);
+  } catch (error: any) {
+      console.error('Erro ao deletar cliente:', error.response ? error.response.data : error);
+  }
 }
 //_-------------------------------------------PRODUTOS-------------------------------------------------//
 
@@ -243,9 +335,14 @@ const GetAllProduto = async () =>{
     AtualizarProduto,
     DeletarProduto,
     GetAllProduto,
+    GetAllCliente,
+    DeletarCliente,
+    GetCliente,
+    AtualizarCliente,
     cadastroUserStatus,
     EditarUserStatus,
-    cadastroProdutoStatus
+    cadastroProdutoStatus,
+    cadastroClienteStatus
     }}>
         {children}
     </AuthContext.Provider>

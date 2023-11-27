@@ -26,8 +26,8 @@ const Dashboard = () => {
         navigate('/cadastroUsuario')
     }
     
-    function CadastrarProduto(){
-      navigate('/verifyUser/cadastroProduto')
+    function PainelProdutos(){
+      navigate('/verifyUser/dashboardproduto')
     }
 
     const ButtomCustomCreate = () =>{
@@ -41,7 +41,7 @@ const Dashboard = () => {
     const ButtomCustomCreateProduct = () =>{
       return(
         <div>
-          <button onClick={CadastrarProduto} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Cadastrar Produto</button>
+          <button onClick={PainelProdutos} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel de Produtos</button>
         </div>
       )
     }
