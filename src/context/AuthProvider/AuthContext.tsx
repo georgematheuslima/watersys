@@ -7,10 +7,12 @@ type childrenType = {
 
 
 type authContextData = {//
+  cadastroUserStatus:boolean;
+  EditarUserStatus:boolean;
   //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
-  GetUsuario:(userId: string)=>void
+  GetUsuario:(userId: number)=>void
   GetAllUsuario:() => Promise<AxiosResponse<any>>;
   DeleteUsuario:(userId: number)=>void
   EditarUsuario:(name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean, userId:number)=>void
@@ -33,6 +35,9 @@ export const useAuth = () => {
     return context;
   };
 export const AuthProvider:FC<childrenType> = ({children}) => {
+  const [cadastroUserStatus, setcadastroUserStatus] = useState(false);
+  const [EditarUserStatus, setEditarUserStatus] = useState(false);
+
 
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
@@ -75,6 +80,7 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
           }
       });
     } catch (error:any) {
+      setcadastroUserStatus(true);
         console.error('Erro ao registrar usuário:', error.response ? error.response.data : error);
     }
   }
@@ -94,11 +100,12 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
           }
       });
     } catch (error:any) {
+      setEditarUserStatus(true);
         console.error('Erro ao Editar usuário:', error.response ? error.response.data : error);
     }
   }
 
-  const GetUsuario = async (userId: string) => {
+  const GetUsuario = async (userId: number) => {
     try {
         const response = await axios.get(`http://localhost:8000/api/v1/users/${userId}`);
         console.log('Dados do usuário:', response.data);
@@ -150,7 +157,11 @@ const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, va
         valor_compra: valor_compra,
         valor_venda: valor_venda,
         quantidade: quantidade,
-      });
+      },{
+        headers: {
+            'Content-Type': 'application/json', 'accept': 'application/json'
+        }
+    });
       console.log(response.data);
   } catch (error:any) {
       console.error('Erro ao registrar produto:', error.response ? error.response.data : error);
@@ -161,6 +172,7 @@ const GetProduto = async (produtoId: number) => {
   try {
       const response = await axios.get(`http://localhost:8000/api/v1/products/product/${produtoId}`);
       console.log('Dados do produto:', response.data);
+      return response
   } catch (error: any) {
       console.error('Erro ao buscar produto:', error.response ? error.response.data : error);
   }
@@ -169,12 +181,16 @@ const GetProduto = async (produtoId: number) => {
 const AtualizarProduto = async (produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number) => {
   try {
       const response = await axios.put(`http://localhost:8000/api/v1/products/product/${produtoId}`, {
-          descricao,
-          unidade_idunidade,
-          valor_compra,
-          valor_venda,
-          quantidade
-      });
+        descricao: descricao,
+        unidade_idunidade: unidade_idunidade,
+        valor_compra: valor_compra,
+        valor_venda: valor_venda,
+        quantidade: quantidade,
+      },{
+        headers: {
+            'Content-Type': 'application/json', 'accept': 'application/json'
+        }
+    });
       console.log('Produto atualizado com sucesso:', response.data);
   } catch (error: any) {
       console.error('Erro ao atualizar produto:', error.response ? error.response.data : error);
@@ -208,7 +224,9 @@ const DeletarProduto = async (produtoId: number) => {
     RegistrarProduto,
     GetProduto,
     AtualizarProduto,
-    DeletarProduto
+    DeletarProduto,
+    cadastroUserStatus,
+    EditarUserStatus
     }}>
         {children}
     </AuthContext.Provider>

@@ -23,7 +23,6 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     function CadastrarUsuario(){
-        console.log(usuarios);
         navigate('/cadastroUsuario')
       }
     
@@ -37,6 +36,10 @@ const Dashboard = () => {
 
     const Delete = (id:number)=>{
        DeleteUsuario(id);
+
+       setTimeout(()=>{
+          window.location.reload();
+       },2000)
     }
     useEffect(() => {
         const buscarTodosUsuarios = async () => {
@@ -68,7 +71,6 @@ const Dashboard = () => {
     }, 2000);
 
     
-
     return (
       <div className="container-tabela">
       <h3 className="text-center">Lista de Usuários</h3>
@@ -91,7 +93,7 @@ const Dashboard = () => {
                       <td>{usuario.phone_number}</td>
                       <td>{usuario.is_admin ? 'Yes' : 'No'}</td>
                       <td>
-                        <Link to={`/edit/${usuario.id}`} className="btn btn-primary">
+                        <Link to={`/verifyUser/edit/${usuario.id}`} className="btn btn-primary">
                           Edit
                         </Link>
                       </td>

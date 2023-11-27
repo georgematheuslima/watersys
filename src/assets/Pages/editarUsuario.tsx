@@ -3,9 +3,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { AiOutlineMail,AiOutlineKey, AiTwotoneSchedule, AiOutlinePhone } from "react-icons/ai";
 import"../scss/Login_Page.scss"
 import * as yup from 'yup';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 type IContactFormProps = {
     name?: string;
@@ -14,6 +14,16 @@ type IContactFormProps = {
      phone_number?:string;
     password:string;
     is_admin?:boolean;
+}
+
+interface  IContactFormDTO{
+  id:number;
+  name?: string;
+  last_name?: string;
+  email?:string;
+  phone_number?:string;
+  password:string;
+  is_admin:boolean;
 }
 
 const contactSchema= yup.object().shape({
@@ -27,17 +37,54 @@ const contactSchema= yup.object().shape({
 
 
 export const Editar_Usuario:React.FC = () => {
-    const {EditarUsuario} = useAuth()
-  const { register, handleSubmit, formState } = useForm({
+  const [usuario, setUsuario] = useState("");
+  const [erro, setErro] = useState('');
+  const {EditarUsuario,EditarUserStatus,GetUsuario} = useAuth()
+  const [carregando, setCarregando] = useState(false);
+
+  const { register, handleSubmit, formState,setValue } = useForm({
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
   });
   const { userId } = useParams();
   const { errors } = formState;
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    const buscarTodosUsuarios = async () => {
+        setCarregando(true);
+        try {
+            const response = await GetUsuario(Number(userId));
+            setUsuario(response.data.name);
+            setValue('email',response.data.email);
+            setValue('name', response.data.name);
+            setValue('last_name', response.data.last_name);
+            setValue('phone_number', response.data.phone_number);
+            setValue('is_admin', response.data.is_admin);
+            setErro(''); // Limpar qualquer erro anterior
+        } catch (error) {
+            setErro('Erro ao buscar usuários'); // Definir mensagem de erro
+        } finally {
+            setCarregando(false); // Indicar que o carregamento terminou
+        }
+    };
+
+    buscarTodosUsuarios();
+}, [GetUsuario]);
+
 
   const onSubmit = (data: IContactFormProps) => {
     EditarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data. phone_number),Boolean(data.is_admin), Number((userId)))
-     console.log(data)
+    if(!EditarUserStatus){
+      setTimeout(() => {
+        // Aqui você pode colocar qualquer lógica que queira executar antes do recarregamento
+        alert("A página será recarregada agora.");
+      
+        // Recarregar a página
+        navigate("/verifyUser/dashboard");
+      }, 2000);
+    }
   };
   
 const ButtomCustom = () =>{
@@ -50,7 +97,7 @@ const ButtomCustom = () =>{
   return (
     <div className="background-container">
         <div  className='container_form'>
-            <h1 className='loginTxt'>Editar Usuário</h1>
+            <h1 className='loginTxt'>Editar Usuário  {usuario}</h1>
             <form className='Form' onSubmit={handleSubmit(onSubmit)} >
 
                 <div className='containerInput'>

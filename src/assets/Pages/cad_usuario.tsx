@@ -5,6 +5,7 @@ import"../scss/Login_Page.scss"
 import * as yup from 'yup';
 import React from 'react';
 import { useAuth } from '../../context/AuthProvider/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 type IContactFormProps = {
     name?: string;
@@ -25,17 +26,28 @@ const contactSchema= yup.object().shape({
 
 
 export const Cadastro_Usuario:React.FC = () => {
-	const {RegistrarUsuario} = useAuth()
+	const {RegistrarUsuario,cadastroUserStatus} = useAuth()
   const { register, handleSubmit, formState } = useForm({
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
   });
+  const navigate = useNavigate();
 
   const { errors } = formState;
 
   const onSubmit = (data: IContactFormProps) => {
     RegistrarUsuario(String(data.name), String(data.last_name),String(data.email), String(data.password),String(data. phone_number),Boolean(data.is_admin))
-     console.log(data)
+    
+    if(!cadastroUserStatus){
+      setTimeout(() => {
+        // Aqui você pode colocar qualquer lógica que queira executar antes do recarregamento
+        alert("A página será recarregada agora.");
+      
+        // Recarregar a página
+        navigate("/verifyUser/dashboard");
+      }, 2000);
+    }
+    
   };
   
 const ButtomCustom = () =>{
