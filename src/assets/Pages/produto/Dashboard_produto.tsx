@@ -107,7 +107,7 @@ const Dashboard_Produto = () => {
                       <td>{produto.valor_compra}</td>
                       <td>{produto.valor_venda}</td>
                       <td>
-                        <Link to={`/verifyUser/edit/${produto.id}`} className="btn btn-primary">
+                        <Link to={`/verifyUser/produto/edit/${produto.id}`} className="btn btn-primary">
                           Edit
                         </Link>
                       </td>

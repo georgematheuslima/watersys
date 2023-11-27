@@ -176,7 +176,7 @@ const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, va
 
 const GetProduto = async (produtoId: number) => {
   try {
-      const response = await axios.get(`http://localhost:8000/api/v1/products/product/${produtoId}`);
+      const response = await axios.get(`http://localhost:8000/api/v1/products/product/{id}?product_id=${produtoId}`);
       console.log('Dados do produto:', response.data);
       return response
   } catch (error: any) {
@@ -186,7 +186,7 @@ const GetProduto = async (produtoId: number) => {
 
 const AtualizarProduto = async (produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number) => {
   try {
-      const response = await axios.put(`http://localhost:8000/api/v1/products/product/${produtoId}`, {
+      const response = await axios.put(`http://localhost:8000/api/v1/products/product/{id}?product_id=${produtoId}`, {
         descricao: descricao,
         unidade_idunidade: unidade_idunidade,
         valor_compra: valor_compra,
@@ -206,7 +206,7 @@ const AtualizarProduto = async (produtoId: number, descricao: string, unidade_id
 
 const DeletarProduto = async (product_id: number) => {
   try {
-      const response = await axios.delete(`http://localhost:8000/api/v1/products/product/${product_id}`,{
+      const response = await axios.delete(`http://localhost:8000/api/v1/products/product/{id}?product_id=${product_id}`,{
       });
       console.log('Produto deletado com sucesso:', response.data);
   } catch (error: any) {

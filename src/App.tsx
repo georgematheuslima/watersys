@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthProvider/AuthContext';
 import { Editar_Usuario } from './assets/Pages/editarUsuario';
 import { Cadastro_Produto } from './assets/Pages/produto/cad_produto';
 import Dashboard_Produto from './assets/Pages/produto/Dashboard_produto';
+import { Editar_Produto } from './assets/Pages/produto/edit_produto';
 
 
 export const App = () => {
@@ -22,6 +23,8 @@ export const App = () => {
             <Route path="edit/:userId" element={<Editar_Usuario/>}/>
             <Route path="cadastroProduto" element={<Cadastro_Produto/>}/>
             <Route path="dashboardproduto" element={<Dashboard_Produto/>}/>
+            <Route path="produto/edit/:produtoId" element={<Editar_Produto/>}/>
+
           </Route>
         </Routes>
       </Router>
