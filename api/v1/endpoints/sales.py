@@ -1,5 +1,6 @@
 import logging
 import traceback
+from datetime import datetime
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,13 +13,13 @@ from core.deps import get_session
 from models.sales_model import SaleModel
 from models.client_model import ClientModel
 from models.products_model import ProductModel
-from schemas.sale_schema import SaleCreate, Sale
+from schemas.sale_schema import SaleCreate, SaleAllInfo
 
 router = APIRouter()
 LOGGER = logging.getLogger('sLogger')
 
 
-@router.post('/sales', status_code=HTTPStatus.CREATED, response_model=Sale)
+@router.post('/sales', status_code=HTTPStatus.CREATED)
 async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session)):
     LOGGER.info(f'Starting creation of a new sale: {sale}')
     try:
@@ -41,13 +42,12 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST,
                                     detail='Insufficient quantity in stock')
 
-            # Calculando o total_amount com base no quantity e valor_venda do produto
             total_amount = sale.quantity * found_product.valor_venda
 
             new_sale = SaleModel(
                 quantity=sale.quantity,
-                total_amount=total_amount,  # Atualizando total_amount com o cálculo
-                purchase_date=sale.purchase_date,
+                total_amount=total_amount,
+                purchase_date=datetime.now().date(),
                 returnable=sale.returnable,
                 product_id=sale.product_id,
                 cpf=sale.cpf
@@ -62,7 +62,7 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
             await session.commit()
             LOGGER.info('Sale registered successfully')
 
-            return {"Message": f"Sale registered. Sale price {new_sale.total_amount}"}
+            return {"Message": f"Sale registered. Sale price {total_amount}"}
 
     except IntegrityError as exc:
         LOGGER.error(traceback.format_exc())
@@ -78,7 +78,7 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Internal error processing request')
 
-@router.get('/sales', response_model=list[Sale])
+@router.get('/sales', response_model=list[SaleAllInfo])
 async def get_sales(db: AsyncSession = Depends(get_session)):
     LOGGER.info('Getting all sales')
     async with db as session:
@@ -89,7 +89,7 @@ async def get_sales(db: AsyncSession = Depends(get_session)):
         return sales
 
 
-@router.get('/sales/{sale_id}', response_model=Sale)
+@router.get('/sales/{sale_id}', response_model=SaleAllInfo)
 async def get_sale(sale_id: int, db: AsyncSession = Depends(get_session)):
     LOGGER.info(f'Getting sale with ID: {sale_id}')
     async with db as session:
@@ -105,7 +105,7 @@ async def get_sale(sale_id: int, db: AsyncSession = Depends(get_session)):
                                 detail='Sale not found')
 
 
-@router.delete('/sales/{sale_id}', response_model=Sale)
+@router.delete('/sales/{sale_id}', response_model=SaleAllInfo)
 async def delete_sale(sale_id: int, db: AsyncSession = Depends(get_session)):
     LOGGER.info(f'Deleting sale with ID: {sale_id}')
     async with db as session:

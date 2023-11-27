@@ -3,15 +3,27 @@ from datetime import date
 
 class SaleBase(BaseModel):
     quantity: int
-    total_amount: float
-    purchase_date: date
     returnable: bool
 
 class SaleCreate(SaleBase):
     product_id: int
     cpf: str
 
-class Sale(SaleBase):
+class SaleResponse(BaseModel):
+    purchase_date: date
+    total_amount: float
+    id: int
+
+    class Config:
+        from_attributes = True
+
+class SaleAllInfo(BaseModel):
+    quantity: int
+    returnable: bool
+    purchase_date: date
+    product_id: int
+    cpf: str
+    total_amount: float
     id: int
 
     class Config:

@@ -10,9 +10,12 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import SQLAlchemyError
 
 from models.client_model import ClientModel
 from models.address_model import AddressModel
+from schemas.address_schema import AddressSchema
 from schemas.client_schema import ClientSchema
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.client_exceptions import ClientAlreadyRegistered
@@ -87,29 +90,42 @@ async def get_all_clients(db: AsyncSession = Depends(get_session)):
         LOGGER.info('Getting all clients')
         
         async with db as session:
-            query = select(ClientModel)
+            query = select(ClientModel).options(joinedload(ClientModel.client_address))  # Inclui o endereço na consulta
             result = await session.execute(query)
             clients = result.scalars().all()
             
             if clients:
-                clients = [jsonable_encoder(client) for client in clients]
-                LOGGER.info(f'All clients: {clients}')
-                return JSONResponse(content=clients, status_code=HTTPStatus.OK)
+                clients_with_address = [
+                    ClientSchema(
+                        client_first_name=client.client_first_name,
+                        client_last_name=client.client_last_name,
+                        cpf=client.cpf,
+                        address=AddressSchema(
+                            id=client.client_address.id,
+                            address=client.client_address.address,
+                            type=client.client_address.type,
+                            state=client.client_address.state,
+                            abbreviation=client.client_address.abbreviation,
+                            city=client.client_address.city,
+                            neighborhood=client.client_address.neighborhood,
+                            reference_point=client.client_address.reference_point,
+                        ),
+                        phone_number=client.phone_number,
+                        email=client.email
+                    )
+                    for client in clients
+                ]
+                
+                LOGGER.info(f'All clients: {clients_with_address}')
+                return clients_with_address
             else:
-                return JSONResponse(content=[], status_code=HTTPStatus.OK)
-    
-    except IntegrityError as exc:
-        LOGGER.error('IntegrityError occurred', exc_info=True)
-        return JSONResponse(content={"message": 'An integrity error occurred'}, status_code=HTTPStatus.CONFLICT)
-    
-    except OperationalError as exc:
-        LOGGER.error('OperationalError occurred', exc_info=True)
-        return JSONResponse(content={"message": 'An error occurred at DB connect'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
-    
-    except Exception as exc:
-        LOGGER.error('An error occurred', exc_info=True)
-        return JSONResponse(content={"message": f'An error occurred: {exc}'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
-
+                return []
+    except SQLAlchemyError as e:
+        LOGGER.error(f'Error fetching clients: {str(e)}')
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error with database')
+    except Exception as e:
+        LOGGER.error(f'Unhandled error: {str(e)}')
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error')
 @router.get('/client/{id}', status_code=HTTPStatus.OK, response_model=ClientSchema)
 async def get_client_by_id(client_id: int, db: AsyncSession = Depends(get_session)):
     try:
