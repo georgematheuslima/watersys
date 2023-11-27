@@ -140,7 +140,7 @@ async def delete_product(product_id: int, db: AsyncSession = Depends(get_session
         async with db as session:
             product = await session.get(ProductModel, product_id)
             if product:
-                session.delete(product)
+                await session.delete(product)
                 await session.commit()
                 return JSONResponse(content={"message": 'Product deleted successfully'}, status_code=HTTPStatus.OK)
             else:
