@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 /app/make_tables.py
+python3 ./script/populate_table_user.py

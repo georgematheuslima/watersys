@@ -11,6 +11,8 @@ remove:
 up:
 	docker-compose up
 
+up-rebuild:
+	docker-compose up --build
 down:
 	docker-compose down
 

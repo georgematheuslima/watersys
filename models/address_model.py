@@ -1,14 +1,14 @@
 import logging
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String
 from core.configs import settings
 
 LOGGER = logging.getLogger('sLogger')
 
 
 class AddressModel(settings.DBBaseModel):
-    LOGGER.info(f'Salvando as informações no banco')
     __tablename__ = 'address'
+
     id = Column(Integer, name='IDADDRESS', primary_key=True, autoincrement=True)
     address = Column(String(255), name='ADDRESS', nullable=False)
     type = Column(String(50), name='TYPE', nullable=False)

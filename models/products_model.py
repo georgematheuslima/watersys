@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import relationship
 from core.configs import settings
-
 
 
 class ProductModel(settings.DBBaseModel):

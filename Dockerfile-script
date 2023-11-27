@@ -9,4 +9,4 @@ COPY make_tables.py /app/make_tables.py
 
 COPY . .
 
-CMD ["bash", "-c", "sleep 5 && python3 /app/make_tables.py"]
+CMD ["bash", "-c", "sleep 2 && python3 /app/make_tables.py && sleep 2 && python3 populate_table_user.py"]

@@ -22,20 +22,21 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
     LOGGER.info(f'Starting creation of a new sale: {sale}')
     try:
         async with db as session:
-            client_query = select(ClientModel).where(ClientModel.cpf == sale.cpf)
+            client_query = select(ClientModel).where(ClientModel.cpf == str(sale.cpf))
             client = await session.execute(client_query)
             found_client = client.scalars().first()
 
             if not found_client:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Client not found')
 
-            new_sale = SaleModel(**sale.model_dump(), client_id=found_client.id)
+            new_sale = SaleModel(**sale.model_dump(), customer_id=found_client.id)
 
             LOGGER.info('Registering sale in the database')
             session.add(new_sale)
             await session.commit()
             LOGGER.info('Sale registered successfully')
             return new_sale
+
     except IntegrityError as exc:
         LOGGER.error(traceback.format_exc())
         LOGGER.error(f'Integrity error creating sale: {exc}')

@@ -16,7 +16,7 @@ class UserModel(settings.DBBaseModel):
     is_deleted = Column(Boolean, default=False)
     passwd = Column(String(256), nullable=False)
     purchases = relationship(
-        'PurchaseHistoryModel',
+        PurchaseHistoryModel,
         cascade='all,delete-orphan',
         back_populates='customer',
         uselist=True,
