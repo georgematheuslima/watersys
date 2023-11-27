@@ -1,7 +1,8 @@
 import logging
 import traceback
 
-from typing import List, Optional, Any
+from http import HTTPStatus
+from typing import List
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
@@ -9,7 +10,7 @@ from fastapi.responses import JSONResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from models.user_model import UserModel
 from schemas.users_schema import UserSchemaBase, UserSchemaPurchases, UserSchemaUp, UserSchemaCreate
@@ -24,6 +25,7 @@ LOGGER = logging.getLogger('sLogger')
 
 @router.get('/logged', response_model=UserSchemaBase)
 def get_logged(logged_user: UserModel = Depends(get_current_user)):
+    LOGGER.info(f'Recuperando usuário loggado')
     return logged_user
 
 
@@ -63,89 +65,132 @@ async def post_user(user: UserSchemaCreate,
 
 @router.get('/', response_model=List[UserSchemaBase])
 async def get_users(db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        query = select(UserModel)
-        result = await session.execute(query)
-        users: List[UserSchemaBase] = result.scalars().unique().all()
+    try:
+        LOGGER.info('Buscando todos os usuários')
+        async with db as session:
+            query = select(UserModel)
+            result = await session.execute(query)
+            users: List[UserSchemaBase] = result.scalars().unique().all()
 
-        return users
-
+            return users
+    except SQLAlchemyError as db_error:
+        LOGGER.error(f'Erro no banco de dados ao buscar usuários: {db_error}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro no banco de dados ao buscar usuários')
+    except Exception as e:
+        LOGGER.error(f'Erro em get_users: {e}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
 
 @router.get('/{user_id}',
             response_model=UserSchemaPurchases,
-            status_code=status.HTTP_200_OK)
+            status_code=HTTPStatus.OK)
 async def get_user(user_id: int, db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        query = select(UserModel).filter(UserModel.id == user_id)
-        result = await session.execute(query)
-        user: UserSchemaPurchases = result.scalars().unique().one_or_none()
+    try:
+        LOGGER.info(f'Buscando usuário com ID: {user_id}')
+        async with db as session:
+            query = select(UserModel).filter(UserModel.id == user_id)
+            result = await session.execute(query)
+            user: UserSchemaPurchases = result.scalars().unique().one_or_none()
 
-        if user:
-            return user
-        else:
-            raise HTTPException(detail='Usuario não encontrado',
-                                status_code=status.HTTP_404_NOT_FOUND)
+            if user:
+                return user
+            else:
+                raise HTTPException(detail='Usuario não encontrado',
+                                    status_code=HTTPStatus.NOT_FOUND)
+    except SQLAlchemyError as db_error:
+        LOGGER.error(f'Erro no banco de dados ao buscar usuário: {db_error}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro no banco de dados ao buscar usuário')
+    except Exception as e:
+        LOGGER.error(f'Erro em get_user: {e}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
 
 
 @router.put('/{user_id}',
             response_model=UserSchemaBase,
-            status_code=status.HTTP_202_ACCEPTED)
+            status_code=HTTPStatus.ACCEPTED)
 async def put_user(user_id: int,
                    user: UserSchemaUp,
                    db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        query = select(UserModel).filter(UserModel.id == user_id)
-        result = await session.execute(query)
-        user_up: UserSchemaBase = result.scalars().unique().one_or_none()
+    try:
+        LOGGER.info(f'Atualizando usuário com ID: {user_id}')
+        async with db as session:
+            query = select(UserModel).filter(UserModel.id == user_id)
+            result = await session.execute(query)
+            user_up: UserSchemaBase = result.scalars().unique().one_or_none()
 
-        if user_up:
-            if user.name:
-                user_up.name = user.name
-            if user.email:
-                user_up.email = user.email
-            if user.phone_number:
-                user_up.phone_number = user.phone_number
-            if user.is_admin:
-                user_up.is_admin = user.is_admin
-            if user.passwd:
-                user_up.passwd = generate_hast_pass(user.passwd)
+            if user_up:
+                if user.name:
+                    user_up.name = user.name
+                if user.email:
+                    user_up.email = user.email
+                if user.phone_number:
+                    user_up.phone_number = user.phone_number
+                if user.is_admin:
+                    user_up.is_admin = user.is_admin
+                if user.passwd:
+                    user_up.passwd = generate_hast_pass(user.passwd)
 
-            await session.commit()
+                await session.commit()
 
-            return user_up
-        else:
-            raise HTTPException(detail='Usuario não encontrado',
-                                status_code=status.HTTP_404_NOT_FOUND)
+                return user_up
+            else:
+                raise HTTPException(detail='Usuario não encontrado',
+                                    status_code=HTTPStatus.NOT_FOUND)
+    except SQLAlchemyError as db_error:
+        LOGGER.error(f'Erro no banco de dados ao atualizar usuário: {db_error}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro no banco de dados ao atualizar usuário')
+    except Exception as e:
+        LOGGER.error(f'Erro em put_user: {e}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
 
-
-@router.delete('/{user_id}',
-               status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{user_id}', status_code=HTTPStatus.NO_CONTENT)
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        query = select(UserModel).filter(UserModel.id == user_id)
-        result = await session.execute(query)
-        user_del: UserSchemaBase = result.scalars().unique().one_or_none()
+    try:
+        LOGGER.info(f'Deletando usuário com ID: {user_id}')
+        async with db as session:
+            query = select(UserModel).filter(UserModel.id == user_id)
+            result = await session.execute(query)
+            user_del: UserSchemaBase = result.scalars().unique().one_or_none()
 
-        if user_del:
-            await session.delete(user_del)
-            await session.commit()
-
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-        else:
-            raise HTTPException(detail='Usuario não encontrado',
-                                status_code=status.HTTP_404_NOT_FOUND)
-
-
+            if user_del:
+                await session.delete(user_del)
+                await session.commit()
+                return Response(status_code=HTTPStatus.NO_CONTENT)
+            else:
+                raise HTTPException(detail='Usuario não encontrado',
+                                    status_code=HTTPStatus.NOT_FOUND)
+    except SQLAlchemyError as db_error:
+        LOGGER.error(f'Erro no banco de dados ao deletar usuário: {db_error}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro no banco de dados ao deletar usuário')
+    except Exception as e:
+        LOGGER.error(f'Erro em delete_user: {e}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
 @router.post('/login')
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: AsyncSession = Depends(get_session)):
-    user = await authenticate(email=form_data.username,
-                              passwd=form_data.password,
-                              db=db)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail='Dados de acesso incorretos')
-    return JSONResponse(content={'access_token':
-                                 create_access_token(sub=user.id),
-                                 'token_type': 'Bearer'},
-                        status_code=status.HTTP_200_OK)
+    try:
+        user = await authenticate(email=form_data.username,
+                                  passwd=form_data.password,
+                                  db=db)
+        if not user:
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST,
+                                detail='Dados de acesso incorretos')
+        return JSONResponse(content={'access_token':
+                                     create_access_token(sub=user.id),
+                                     'token_type': 'Bearer'},
+                            status_code=HTTPStatus.OK)
+    except SQLAlchemyError as db_error:
+        LOGGER.error(f'Erro no banco de dados ao fazer login: {db_error}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro no banco de dados ao fazer login')
+    except Exception as e:
+        LOGGER.error(f'Erro em login: {e}', exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
