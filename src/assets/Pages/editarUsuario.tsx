@@ -16,16 +16,6 @@ type IContactFormProps = {
     is_admin?:boolean;
 }
 
-interface  IContactFormDTO{
-  id:number;
-  name?: string;
-  last_name?: string;
-  email?:string;
-  phone_number?:string;
-  password:string;
-  is_admin:boolean;
-}
-
 const contactSchema= yup.object().shape({
   email: yup.string().required(),
   password: yup.string().required(),
@@ -39,9 +29,8 @@ const contactSchema= yup.object().shape({
 export const Editar_Usuario:React.FC = () => {
   const [usuario, setUsuario] = useState("");
   const [erro, setErro] = useState('');
-  const {EditarUsuario,EditarUserStatus,GetUsuario} = useAuth()
   const [carregando, setCarregando] = useState(false);
-
+  const {EditarUsuario,EditarUserStatus,GetUsuario} = useAuth()
   const { register, handleSubmit, formState,setValue } = useForm({
     reValidateMode: 'onBlur',
     resolver: yupResolver(contactSchema),
@@ -49,7 +38,6 @@ export const Editar_Usuario:React.FC = () => {
   const { userId } = useParams();
   const { errors } = formState;
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const buscarTodosUsuarios = async () => {
@@ -97,7 +85,7 @@ const ButtomCustom = () =>{
   return (
     <div className="background-container">
         <div  className='container_form'>
-            <h1 className='loginTxt'>Editar Usuário  {usuario}</h1>
+            <h1 className='loginTxt'>Editar Usuário</h1>
             <form className='Form' onSubmit={handleSubmit(onSubmit)} >
 
                 <div className='containerInput'>

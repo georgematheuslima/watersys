@@ -9,6 +9,7 @@ type childrenType = {
 type authContextData = {//
   cadastroUserStatus:boolean;
   EditarUserStatus:boolean;
+  cadastroProdutoStatus:boolean;
   //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
@@ -23,6 +24,7 @@ type authContextData = {//
   GetProduto:(produtoId: number)=>void
   AtualizarProduto:(produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number)=>void
   DeletarProduto:(produtoId: number)=>void
+  GetAllProduto:() => Promise<AxiosResponse<any>>;
 }
 
 const AuthContext = createContext<authContextData | undefined>(undefined);
@@ -38,6 +40,8 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
   const [cadastroUserStatus, setcadastroUserStatus] = useState(false);
   const [EditarUserStatus, setEditarUserStatus] = useState(false);
 
+  const [cadastroProdutoStatus, setcadastroProdutoStatus] = useState(false);
+  const [EditarProdutoStatus, setEditarProdutoStatus] = useState(false);
 
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
@@ -152,6 +156,7 @@ const RegistrarCliente =(email: string, password:string, cpf:string,  phone_numb
 const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, valor_compra:number,  valor_venda:number, quantidade:number)=>{
   try {
       const response = await axios.post('http://localhost:8000/api/v1/products/product', {
+        id:1,
         descricao: descricao,
         unidade_idunidade: unidade_idunidade,
         valor_compra: valor_compra,
@@ -162,8 +167,9 @@ const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, va
             'Content-Type': 'application/json', 'accept': 'application/json'
         }
     });
-      console.log(response.data);
+      console.log("Produto Registrado:"+ response.data);
   } catch (error:any) {
+      setcadastroProdutoStatus(true);
       console.error('Erro ao registrar produto:', error.response ? error.response.data : error);
   }
 }
@@ -198,17 +204,28 @@ const AtualizarProduto = async (produtoId: number, descricao: string, unidade_id
 
 }
 
-const DeletarProduto = async (produtoId: number) => {
+const DeletarProduto = async (product_id: number) => {
   try {
-      const response = await axios.delete(`http://localhost:8000/api/v1/products/product/${produtoId}`);
+      const response = await axios.delete(`http://localhost:8000/api/v1/products/product/${product_id}`,{
+      });
       console.log('Produto deletado com sucesso:', response.data);
   } catch (error: any) {
       console.error('Erro ao deletar produto:', error.response ? error.response.data : error);
   }
 }
 
-
-
+const GetAllProduto = async () =>{
+  try {
+    const response = await axios.get("http://localhost:8000/api/v1/products/products",{});
+    return response;
+  } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+          console.error('Erro ao buscar Produtos:', error.response.data);
+      } else {
+          console.error('Erro na requisição:', error);
+      }
+    }
+}
 
 
 
@@ -225,8 +242,10 @@ const DeletarProduto = async (produtoId: number) => {
     GetProduto,
     AtualizarProduto,
     DeletarProduto,
+    GetAllProduto,
     cadastroUserStatus,
-    EditarUserStatus
+    EditarUserStatus,
+    cadastroProdutoStatus
     }}>
         {children}
     </AuthContext.Provider>

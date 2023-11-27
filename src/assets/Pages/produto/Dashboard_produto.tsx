@@ -3,23 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthProvider/AuthContext';
 import"../../scss/Tabela.scss"
 
-const Dashboard = () => {
+const Dashboard_Produto = () => {
   interface  IContactFormDTO{
     id:number;
-    name?: string;
-    last_name?: string;
-    email?:string;
-    phone_number?:string;
-    password:string;
-    is_admin:boolean;
+    descricao?: string;
+    unidade_idunidade?: number;
+    valor_compra?:number;
+    valor_venda?:number;
+    quantidade:number;
   }
 
-  const [usuarios, setUsuarios] = useState<IContactFormDTO[]>([]);
+  const [produtos, setProdutos] = useState<IContactFormDTO[]>([]);
     const [carregando, setCarregando] = useState(false);
     const [isReady, setisReady] = useState(false);
     const [erro, setErro] = useState('');
     
-    const { GetAllUsuario,DeleteUsuario } = useAuth();
+    const { GetAllProduto,DeletarProduto } = useAuth();
     const navigate = useNavigate();
 
     function CadastrarUsuario(){
@@ -48,19 +47,17 @@ const Dashboard = () => {
 
 
     const Delete = (id:number)=>{
-       DeleteUsuario(id);
+        DeletarProduto(id);
 
-       setTimeout(()=>{
-          window.location.reload();
-       },2000)
+       
     }
     useEffect(() => {
         const buscarTodosUsuarios = async () => {
             setCarregando(true);
             try {
-                const response = await GetAllUsuario();
+                const response = await GetAllProduto();
                 console.log(response.data)
-                setUsuarios(response.data); // Atualizar o estado com os dados recebidos
+                setProdutos(response.data); // Atualizar o estado com os dados recebidos
                 setErro(''); // Limpar qualquer erro anterior
             } catch (error) {
                 setErro('Erro ao buscar usuários'); // Definir mensagem de erro
@@ -70,7 +67,7 @@ const Dashboard = () => {
         };
 
         buscarTodosUsuarios();
-    }, [GetAllUsuario]);
+    }, [GetAllProduto]);
 
     setTimeout(() => {
       if (!isReady) {
@@ -86,32 +83,36 @@ const Dashboard = () => {
     
     return (
       <div className="container-tabela">
-      <h3 className="text-center">Lista de Usuários</h3>
+      <h3 className="text-center">Lista de Produtos</h3>
       {carregando && <p>Carregando...</p>}
       {erro && <p>{erro}</p>}
       <table className="table"style={{ marginTop: 20 }}>
           <thead>
               <tr>
-                  <th>Name</th>
-                  <th>Last Name</th>
-                  <th>Contact</th>
-                  <th>Admin</th>
+                    <th>ID</th>
+                  <th>Descrição</th>
+                  <th>ID Unidade</th>
+                  <th>Quantidade</th>
+                  <th>Valor da compra</th>
+                  <th>Valor da venda</th>
               </tr>
           </thead>
           <tbody>
-              {usuarios.map((usuario, index) => (
+              {produtos.map((produto, index) => (
                   <tr key={index}>
-                      <td>{usuario.name}</td>
-                      <td>{usuario.last_name}</td>
-                      <td>{usuario.phone_number}</td>
-                      <td>{usuario.is_admin ? 'Yes' : 'No'}</td>
+                      <td>{produto.id}</td>
+                      <td>{produto.descricao}</td>
+                      <td>{produto.unidade_idunidade}</td>
+                      <td>{produto.quantidade}</td>
+                      <td>{produto.valor_compra}</td>
+                      <td>{produto.valor_venda}</td>
                       <td>
-                        <Link to={`/verifyUser/edit/${usuario.id}`} className="btn btn-primary">
+                        <Link to={`/verifyUser/edit/${produto.id}`} className="btn btn-primary">
                           Edit
                         </Link>
                       </td>
                       <td>
-                        <button onClick={() => Delete(usuario.id)} className="btn btn-danger">
+                        <button onClick={() => Delete(produto.id)} className="btn btn-danger">
                           Delete
                         </button>
                       </td>
@@ -125,4 +126,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default Dashboard_Produto;

@@ -6,6 +6,8 @@ import PrivateRoute from './context/PrivateRoute/privateRoute';
 import Dashboard from './assets/Pages/Dash/Dashboard';
 import { AuthProvider } from './context/AuthProvider/AuthContext';
 import { Editar_Usuario } from './assets/Pages/editarUsuario';
+import { Cadastro_Produto } from './assets/Pages/produto/cad_produto';
+import Dashboard_Produto from './assets/Pages/produto/Dashboard_produto';
 
 
 export const App = () => {
@@ -18,6 +20,8 @@ export const App = () => {
           <Route path="/verifyUser/" element={<PrivateRoute/>}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="edit/:userId" element={<Editar_Usuario/>}/>
+            <Route path="cadastroProduto" element={<Cadastro_Produto/>}/>
+            <Route path="dashboardproduto" element={<Dashboard_Produto/>}/>
           </Route>
         </Routes>
       </Router>
