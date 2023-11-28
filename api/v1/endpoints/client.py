@@ -16,7 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from models.client_model import ClientModel
 from models.address_model import AddressModel
 from schemas.address_schema import AddressSchema
-from schemas.client_schema import ClientSchema
+from schemas.client_schema import ClientSchema, ClientSchemaReturn
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.client_exceptions import ClientAlreadyRegistered
 from exceptions.general_exceptions import ServerException
@@ -84,19 +84,20 @@ async def create_new_client(client: ClientSchema, db: AsyncSession = Depends(get
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": 'An error occurred'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-@router.get('/clients', status_code=HTTPStatus.OK, response_model=List[ClientSchema])
+@router.get('/clients', status_code=HTTPStatus.OK, response_model=List[ClientSchemaReturn])
 async def get_all_clients(db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info('Getting all clients')
         
         async with db as session:
-            query = select(ClientModel).options(joinedload(ClientModel.client_address))  # Inclui o endereço na consulta
+            query = select(ClientModel).options(joinedload(ClientModel.client_address))
             result = await session.execute(query)
             clients = result.scalars().all()
             
             if clients:
                 clients_with_address = [
-                    ClientSchema(
+                    ClientSchemaReturn(
+                        id=client.id,
                         client_first_name=client.client_first_name,
                         client_last_name=client.client_last_name,
                         cpf=client.cpf,
@@ -116,7 +117,6 @@ async def get_all_clients(db: AsyncSession = Depends(get_session)):
                     for client in clients
                 ]
                 
-                LOGGER.info(f'All clients: {clients_with_address}')
                 return clients_with_address
             else:
                 return []
@@ -126,7 +126,8 @@ async def get_all_clients(db: AsyncSession = Depends(get_session)):
     except Exception as e:
         LOGGER.error(f'Unhandled error: {str(e)}')
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error')
-@router.get('/client/{id}', status_code=HTTPStatus.OK, response_model=ClientSchema)
+
+@router.get('/client/{id}', status_code=HTTPStatus.OK, response_model=ClientSchemaReturn)
 async def get_client_by_id(client_id: int, db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info(f'Getting client by id: {client_id}')
@@ -172,7 +173,7 @@ async def delete_client(client_id: int, db: AsyncSession = Depends(get_session))
         async with db as session:
             client = await session.get(ClientModel, client_id)
             if client:
-                session.delete(client)
+                await session.delete(client)
                 await session.commit()
                 return JSONResponse(content={"message": 'Client deleted successfully'}, status_code=HTTPStatus.OK)
             else:

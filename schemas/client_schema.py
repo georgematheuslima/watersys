@@ -8,3 +8,12 @@ class ClientSchema(BaseModel):
     address: AddressSchema
     phone_number: str
     email: str
+
+class ClientSchemaReturn(BaseModel):
+    id: int
+    client_first_name: str
+    client_last_name: str
+    cpf: str
+    address: AddressSchema
+    phone_number: str
+    email: str
