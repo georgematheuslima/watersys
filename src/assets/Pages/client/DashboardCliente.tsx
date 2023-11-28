@@ -113,46 +113,51 @@ type Iaddress={
 
     
     return (
-      <div className="container-tabela">
-      <h3 className="text-center">Lista de Produtos</h3>
-      {carregando && <p>Carregando...</p>}
-      {erro && <p>{erro}</p>}
-      <table className="table"style={{ marginTop: 20 }}>
-          <thead>
-              <tr>
-                    <th>ID</th>
-                  <th>Primeiro Nome</th>
-                  <th>Ultimo nome</th>
-                  <th>Telefone</th>
-                  <th>Email</th>
-              </tr>
-          </thead>
-          <tbody>
-              {clientes.map((cliente, index) => (
-                  <tr key={index}>
-                      <td>{cliente.id}</td>
-                      <td>{cliente.client_first_name}</td>
-                      <td>{cliente.client_last_name}</td>
-                      <td>{cliente.phone_number}</td>
-                      <td>{cliente.email}</td>
-                      <td>
-                        <Link to={`/verifyUser/cliente/edit/${cliente.id}`} className="btn btn-primary">
-                          Edit
-                        </Link>
-                      </td>
-                      <td>
-                        <button onClick={() => Delete(cliente.id)} className="btn btn-danger">
-                          Delete
-                        </button>
-                      </td>
-                  </tr>
-              ))}
-          </tbody>
-      </table>
-      <ButtomCustomCreate/>
-      <ButtomCustomCreateProduct/>
-      <ButtomCadastroCliente/>
-  </div>
+        <div className='container'>
+            <div className="container-tabela">
+                <h3 className="text-center">Painel de Cliente</h3>
+                {carregando && <p>Carregando...</p>}
+                {erro && <p>{erro}</p>}
+                <table className="table"style={{ marginTop: 20 }}>
+                <thead>
+                    <tr>
+                            <th>ID</th>
+                        <th>Primeiro Nome</th>
+                        <th>Ultimo nome</th>
+                        <th>Telefone</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {clientes.map((cliente, index) => (
+                        <tr key={index}>
+                            <td>{cliente.id}</td>
+                            <td>{cliente.client_first_name}</td>
+                            <td>{cliente.client_last_name}</td>
+                            <td>{cliente.phone_number}</td>
+                            <td>{cliente.email}</td>
+                            <td>
+                                <Link to={`/verifyUser/cliente/edit/${cliente.id}`} className="btn btn-primary">
+                                Edit
+                                </Link>
+                            </td>
+                            <td>
+                                <button onClick={() => Delete(cliente.id)} className="btn btn-danger">
+                                Delete
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+                </table>
+                
+            </div>
+            <div className='buttonFoot'>
+                <ButtomCustomCreate/>
+                <ButtomCustomCreateProduct/>
+                <ButtomCadastroCliente/>
+            </div>
+        </div>
     );
 };
 

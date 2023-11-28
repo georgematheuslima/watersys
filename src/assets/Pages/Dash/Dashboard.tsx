@@ -30,6 +30,11 @@ const Dashboard = () => {
       navigate('/verifyUser/dashboardproduto')
     }
 
+    function PainelCliente(){
+      navigate('/verifyUser/dashboardcliente')
+    }
+
+
     const ButtomCustomCreate = () =>{
       return(
         <div>
@@ -42,6 +47,14 @@ const Dashboard = () => {
       return(
         <div>
           <button onClick={PainelProdutos} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel de Produtos</button>
+        </div>
+      )
+    }
+
+    const ButtomCustomCreateCliente = () =>{
+      return(
+        <div>
+          <button onClick={PainelCliente} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel Cliente</button>
         </div>
       )
     }
@@ -85,43 +98,49 @@ const Dashboard = () => {
 
     
     return (
-      <div className="container-tabela">
-      <h3 className="text-center">Lista de Usuários</h3>
-      {carregando && <p>Carregando...</p>}
-      {erro && <p>{erro}</p>}
-      <table className="table"style={{ marginTop: 20 }}>
-          <thead>
-              <tr>
-                  <th>Name</th>
-                  <th>Last Name</th>
-                  <th>Contact</th>
-                  <th>Admin</th>
-              </tr>
-          </thead>
-          <tbody>
-              {usuarios.map((usuario, index) => (
-                  <tr key={index}>
-                      <td>{usuario.name}</td>
-                      <td>{usuario.last_name}</td>
-                      <td>{usuario.phone_number}</td>
-                      <td>{usuario.is_admin ? 'Yes' : 'No'}</td>
-                      <td>
-                        <Link to={`/verifyUser/edit/${usuario.id}`} className="btn btn-primary">
-                          Edit
-                        </Link>
-                      </td>
-                      <td>
-                        <button onClick={() => Delete(usuario.id)} className="btn btn-danger">
-                          Delete
-                        </button>
-                      </td>
+      <div className='container'>
+        <div className="container-tabela">
+          <h3 className="text-center">Painel de Usuários</h3>
+          {carregando && <p>Carregando...</p>}
+          {erro && <p>{erro}</p>}
+          <table className="table"style={{ marginTop: 20 }}>
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>Last Name</th>
+                      <th>Contact</th>
+                      <th>Admin</th>
                   </tr>
-              ))}
-          </tbody>
-      </table>
-      <ButtomCustomCreate/>
-      <ButtomCustomCreateProduct/>
-  </div>
+              </thead>
+              <tbody>
+                  {usuarios.map((usuario, index) => (
+                      <tr key={index}>
+                          <td>{usuario.name}</td>
+                          <td>{usuario.last_name}</td>
+                          <td>{usuario.phone_number}</td>
+                          <td>{usuario.is_admin ? 'Yes' : 'No'}</td>
+                          <td>
+                            <Link to={`/verifyUser/edit/${usuario.id}`} className="btn btn-primary">
+                              Edit
+                            </Link>
+                          </td>
+                          <td>
+                            <button onClick={() => Delete(usuario.id)} className="btn btn-danger">
+                              Delete
+                            </button>
+                          </td>
+                      </tr>
+                  ))}
+              </tbody>
+          </table>
+          
+        </div>
+        <div className='buttonFoot'>
+          <ButtomCustomCreate/>
+          <ButtomCustomCreateProduct/>
+          <ButtomCustomCreateCliente/>
+        </div>
+      </div>
     );
 };
 

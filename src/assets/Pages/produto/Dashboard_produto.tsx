@@ -25,6 +25,10 @@ const Dashboard_Produto = () => {
         navigate('/verifyUser/dashboard')
     }
     
+    function PainelCliente(){
+      navigate('/verifyUser/dashboardcliente')
+    }
+
     function CadastrarProduto(){
       navigate('/verifyUser/cadastroProduto')
     }
@@ -41,6 +45,14 @@ const Dashboard_Produto = () => {
       return(
         <div>
           <button onClick={CadastrarProduto} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Cadastrar Produto</button>
+        </div>
+      )
+    }
+
+    const ButtomCustomCreateCliente = () =>{
+      return(
+        <div>
+          <button onClick={PainelCliente} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel Cliente</button>
         </div>
       )
     }
@@ -82,48 +94,54 @@ const Dashboard_Produto = () => {
 
     
     return (
-      <div className="container-tabela">
-      <h3 className="text-center">Lista de Produtos</h3>
-      {carregando && <p>Carregando...</p>}
-      {erro && <p>{erro}</p>}
-      <table className="table"style={{ marginTop: 20 }}>
-          <thead>
-              <tr>
-                    <th>ID</th>
-                  <th>Descrição</th>
-                  <th>ID Unidade</th>
-                  <th>Quantidade</th>
-                  <th>Valor da compra</th>
-                  <th>Valor da venda</th>
-              </tr>
-          </thead>
-          <tbody>
-              {produtos.map((produto, index) => (
-                  <tr key={index}>
-                      <td>{produto.id}</td>
-                      <td>{produto.descricao}</td>
-                      <td>{produto.unidade_idunidade}</td>
-                      <td>{produto.quantidade}</td>
-                      <td>{produto.valor_compra}</td>
-                      <td>{produto.valor_venda}</td>
-                      <td>
-                        <Link to={`/verifyUser/produto/edit/${produto.id}`} className="btn btn-primary">
-                          Edit
-                        </Link>
-                      </td>
-                      <td>
-                        <button onClick={() => Delete(produto.id)} className="btn btn-danger">
-                          Delete
-                        </button>
-                      </td>
+      <div className='container'>
+        <div className="container-tabela">
+          <h3 className="text-center">Painel de Produtos</h3>
+          {carregando && <p>Carregando...</p>}
+          {erro && <p>{erro}</p>}
+          <table className="table"style={{ marginTop: 20 }}>
+              <thead>
+                  <tr>
+                        <th>ID</th>
+                      <th>Descrição</th>
+                      <th>ID Unidade</th>
+                      <th>Quantidade</th>
+                      <th>Valor da compra</th>
+                      <th>Valor da venda</th>
                   </tr>
-              ))}
-          </tbody>
-      </table>
-      <ButtomCustomCreate/>
-      <ButtomCustomCreateProduct/>
-  </div>
-    );
+              </thead>
+              <tbody>
+                {produtos.map((produto, index) => (
+                    <tr key={index}>
+                        <td>{produto.id}</td>
+                        <td>{produto.descricao}</td>
+                        <td>{produto.unidade_idunidade}</td>
+                        <td>{produto.quantidade}</td>
+                        <td>{produto.valor_compra}</td>
+                        <td>{produto.valor_venda}</td>
+                        <td>
+                          <Link to={`/verifyUser/produto/edit/${produto.id}`} className="btn btn-primary">
+                            Edit
+                          </Link>
+                        </td>
+                        <td>
+                          <button onClick={() => Delete(produto.id)} className="btn btn-danger">
+                            Delete
+                          </button>
+                        </td>
+                    </tr>
+                ))}
+              </tbody>
+          </table>
+       
+        </div>
+        <div className='buttonFoot'>
+          <ButtomCustomCreate/>
+          <ButtomCustomCreateProduct/>
+          <ButtomCustomCreateCliente/>
+        </div>
+    </div>
+  );
 };
 
 export default Dashboard_Produto;
