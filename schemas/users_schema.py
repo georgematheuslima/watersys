@@ -29,3 +29,11 @@ class UserSchemaUp(UserSchemaBase):
     passwd: Optional[str] = None
     phone_number: Optional[str] = None
     is_admin: Optional[bool] = None
+
+class UserSchemaBaseReturn(BaseModel):
+    id: int
+    name: str
+    last_name: str
+    email: EmailStr
+    phone_number: Optional[str] = None
+    is_admin: bool = False

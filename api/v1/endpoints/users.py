@@ -13,7 +13,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from models.user_model import UserModel
-from schemas.users_schema import UserSchemaBase, UserSchemaPurchases, UserSchemaUp, UserSchemaCreate
+from schemas.users_schema import UserSchemaBase, UserSchemaPurchases, UserSchemaUp, UserSchemaCreate, UserSchemaBaseReturn
 from core.deps import get_session, get_current_user
 from core.security import generate_hast_pass
 from core.auth import authenticate, create_access_token
@@ -63,14 +63,14 @@ async def post_user(user: UserSchemaCreate,
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail='Erro interno ao processar a requisição')
 
-@router.get('/', response_model=List[UserSchemaBase])
+@router.get('/', response_model=List[UserSchemaBaseReturn])
 async def get_users(db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info('Buscando todos os usuários')
         async with db as session:
             query = select(UserModel)
             result = await session.execute(query)
-            users: List[UserSchemaBase] = result.scalars().unique().all()
+            users: List[UserSchemaBaseReturn] = result.scalars().unique().all()
 
             return users
     except SQLAlchemyError as db_error:

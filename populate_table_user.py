@@ -17,7 +17,7 @@ async_session = sessionmaker(
     engine, expire_on_commit=False, class_=AsyncSession
 )
 
-async def populate_users():
+async def populate_users(session):
     async with async_session() as session:
         users_data = [
             {
@@ -48,7 +48,7 @@ async def populate_users():
 
         await session.commit()
 
-async def populate_address():
+async def populate_address(session):
     async with async_session() as session:
         addresses_data = [
                             {
@@ -148,7 +148,7 @@ async def populate_address():
 
         await session.commit()
 
-async def populate_products():
+async def populate_products(session):
     async with async_session() as session:
         products_data = [
             {
@@ -180,7 +180,7 @@ async def populate_products():
 
         await session.commit()
 
-async def populate_clients():
+async def populate_clients(session):
     async with async_session() as session:
         clients_data = [
                         {
@@ -270,64 +270,82 @@ async def populate_clients():
             session.add(client)
 
         await session.commit()
+async def generate_sales_data(session):
+    sales_data_list = []
+    last_purchase_dates = {}
 
-async def generate_sales_data():
-    async with async_session() as session:
-        LOGGER.info('Populating sales table')
-        start_date = datetime.strptime("2023-05-01", "%Y-%m-%d")
-        end_date = datetime.strptime("2023-06-01", "%Y-%m-%d")
-        current_date = start_date
+    LOGGER.info('Populating sales data')
+    start_date = datetime.strptime("2023-01-01", "%Y-%m-%d")
+    end_date = datetime.strptime("2023-10-31", "%Y-%m-%d")
+    current_date = start_date
 
-        clients_cpf = [
-            "13579246801", "98765432109", "24681357901", "98765413209", "36925814701",
-            "98765432091", "15926374801", "98765430192", "12345678999", "99999999999"
-        ]
+    clients_cpf = [
+        "13579246801", "98765432109", "24681357901", "98765413209", "36925814701",
+        "98765432091", "15926374801", "98765430192", "12345678999", "99999999999"
+    ]
 
-        sales_data = []
+    generated_sales = 0
+    while generated_sales < 310:  
+        quantity = randint(1, 3)
+        interval = 0
+        if quantity == 1:
+            interval = randint(7, 10)
+        elif quantity == 2:
+            interval = randint(14, 20)
+        else:
+            interval = 7 * quantity
 
-        for i in range(400):  # Alteração aqui para iterar diretamente 400 vezes
-            LOGGER.info(f'creating {i}')
-            quantity = randint(1, 3)
-            if quantity == 1:
-                interval = randint(7, 10)
-            elif quantity == 2:
-                interval = randint(14, 20)
+        if current_date == start_date:
+            interval = max(interval, 7)
+
+        current_date += timedelta(days=interval)
+        
+        if current_date > end_date:
+            current_date = end_date
+
+        cpf = clients_cpf[generated_sales % len(clients_cpf)]
+
+        next_purchase_date = None
+        if cpf in last_purchase_dates:
+            last_purchase_date = last_purchase_dates[cpf]
+
+            if last_purchase_date + timedelta(days=interval) <= end_date:
+                next_purchase_date = last_purchase_date + timedelta(days=interval)
             else:
-                interval = 7 * quantity
-            
-            current_date += timedelta(days=interval)
+                next_purchase_date = current_date
 
-            if current_date > end_date:
-                LOGGER.info("End date reached. Exiting loop.")
-                break
-            
-            date = current_date.strftime("%Y-%m-%d")
+        else:
+            next_purchase_date = current_date
+
+        last_purchase_dates[cpf] = next_purchase_date
+
+        if next_purchase_date:
+            date = next_purchase_date.strftime("%Y-%m-%d")
 
             sales_record = {
                 "quantity": quantity,
                 "total_amount": quantity * 16,
                 "purchase_date": datetime.strptime(date, '%Y-%m-%d').date(),
-                "returnable": True if randint(0, 1) == 1 else False,
+                "returnable": bool(randint(0, 1)),
                 "product_id": randint(1, 3),
-                "cpf": clients_cpf[i % len(clients_cpf)]  # Ajustando o índice aqui
+                "cpf": cpf
             }
-            sales_data.append(sales_record)
 
-            if len(sales_data) % 10 == 0:
-                LOGGER.info(f'Generated {len(sales_data)} sales records so far.')
+            sales_data_list.append(sales_record)
+            generated_sales += 1
 
-        for data in sales_data:
-            sale = SaleModel(**data)
+    async with session.begin():
+        for sales_record in sales_data_list:
+            sale = SaleModel(**sales_record)
             session.add(sale)
 
-        await session.commit()
-
 async def main():
-    await populate_users()
-    await populate_address()
-    await populate_products()
-    await populate_clients()
-    await generate_sales_data()
+    async with async_session() as session:
+        await populate_address(session)
+        await populate_products(session)
+        await populate_clients(session)
+        await populate_users(session)
+        await generate_sales_data(session)
 
 if __name__ == "__main__":
     import asyncio
