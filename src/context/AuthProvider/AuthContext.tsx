@@ -40,6 +40,12 @@ type authContextData = {//
   AtualizarProduto:(produtoId: number, descricao: string, unidade_idunidade: number, valor_compra: number, valor_venda: number, quantidade: number)=>void
   DeletarProduto:(produtoId: number)=>void
   GetAllProduto:() => Promise<AxiosResponse<any>>;
+  //-----------------vendas------------------------
+  RegistrarVenda:(quantity: number, returnable:boolean, product_id:number,  cpf:string)=>void
+  GetAllVendas:()=>void
+  GetVenda:(vendaId: number)=>void
+  DeletarVenda:(vendaId:number)=>void
+
 }
 
 const AuthContext = createContext<authContextData | undefined>(undefined);
@@ -248,7 +254,6 @@ const DeletarCliente = async (cliente_id: number) => {
 const RegistrarProduto = async ( descricao: string, unidade_idunidade:number, valor_compra:number,  valor_venda:number, quantidade:number)=>{
   try {
       const response = await axios.post('http://localhost:8000/api/v1/products/product', {
-        id:1,
         descricao: descricao,
         unidade_idunidade: unidade_idunidade,
         valor_compra: valor_compra,
@@ -319,6 +324,60 @@ const GetAllProduto = async () =>{
     }
 }
 
+//_-------------------------------------------VENDAS-------------------------------------------------//
+
+
+const RegistrarVenda = async ( quantity: number, returnable:boolean, product_id:number,  cpf:string)=>{
+  try {
+      const response = await axios.post('http://localhost:8000/api/v1/sales/sales', {
+        quantity: quantity,
+        returnable: returnable,
+        product_id: product_id,
+        cpf: cpf,
+      },{
+        headers: {
+            'Content-Type': 'application/json', 'accept': 'application/json'
+        }
+    });
+      console.log("Venda Registrado:"+ response.data);
+  } catch (error:any) {
+      setcadastroProdutoStatus(true);
+      console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
+  }
+}
+
+const GetAllVendas = async () =>{
+  try {
+    const response = await axios.get("http://localhost:8000/api/v1/sales/sales",{});
+    return response;
+  } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+          console.error('Erro ao buscar vendas:', error.response.data);
+      } else {
+          console.error('Erro na requisição:', error);
+      }
+    }
+}
+
+const GetVenda = async (vendaId: number) => {
+  try {
+      const response = await axios.get(`http://localhost:8000/api/v1/sales/sales/${vendaId}`);
+      console.log('Dados da venda:', response.data);
+      return response
+  } catch (error: any) {
+      console.error('Erro ao buscar venda:', error.response ? error.response.data : error);
+  }
+}
+
+const DeletarVenda = async (vendaId: number) => {
+  try {
+      const response = await axios.delete(`http://localhost:8000/api/v1/sales/sales/${vendaId}`,{
+      });
+      console.log('Venda deletado com sucesso:', response.data);
+  } catch (error: any) {
+      console.error('Erro ao deletar venda:', error.response ? error.response.data : error);
+  }
+}
 
 
   return (
@@ -339,6 +398,10 @@ const GetAllProduto = async () =>{
     DeletarCliente,
     GetCliente,
     AtualizarCliente,
+    RegistrarVenda,
+    GetAllVendas,
+    GetVenda,
+    DeletarVenda,
     cadastroUserStatus,
     EditarUserStatus,
     cadastroProdutoStatus,
