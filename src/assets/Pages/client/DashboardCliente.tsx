@@ -4,14 +4,6 @@ import { useAuth } from '../../../context/AuthProvider/AuthContext';
 import"../../scss/Tabela.scss"
 
 const Dashboard_Cliente = () => {
-  interface  IContactFormDTO{
-    id:number;
-    descricao?: string;
-    unidade_idunidade?: number;
-    valor_compra?:number;
-    valor_venda?:number;
-    quantidade:number;
-  }
 
 
   type IContactFormProps = {
@@ -37,7 +29,6 @@ type Iaddress={
 
   const [clientes, setClientes] = useState<IContactFormProps[]>([]);
     const [carregando, setCarregando] = useState(false);
-    const [isReady, setisReady] = useState(false);
     const [erro, setErro] = useState('');
     
     const { GetAllCliente,DeletarCliente } = useAuth();
@@ -53,7 +44,12 @@ type Iaddress={
 
     function CadastroCliente(){
         navigate('/verifyUser/cadastroCliente')
-      }
+    }
+
+    function PAINELVenda(){
+      navigate('/verifyUser/dashboardVendas')
+  }
+
     const ButtomCustomCreate = () =>{
       return(
         <div>
@@ -75,8 +71,16 @@ type Iaddress={
           <div>
             <button onClick={CadastroCliente} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Cadastrar Cliente</button>
           </div>
-        )
-      }
+      )
+    }
+
+    const ButtomPAINELVendas = () =>{
+      return(
+        <div>
+          <button onClick={PAINELVenda} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel de Vendas</button>
+        </div>
+    )
+  }
 
 
     const Delete = (id:number)=>{
@@ -99,17 +103,6 @@ type Iaddress={
 
         buscarTodosUsuarios();
     }, [GetAllCliente]);
-
-    setTimeout(() => {
-      if (!isReady) {
-        toastr.info(
-          "It is possible that the service is being restarted, please wait more ...",
-          "",
-          { timeOut: 8000 }
-        );
-      }
-
-    }, 2000);
 
     
     return (
@@ -156,6 +149,7 @@ type Iaddress={
                 <ButtomCustomCreate/>
                 <ButtomCustomCreateProduct/>
                 <ButtomCadastroCliente/>
+                <ButtomPAINELVendas/>
             </div>
         </div>
     );

@@ -3,21 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthProvider/AuthContext';
 import"../../scss/Tabela.scss"
 
-const Dashboard_Produto = () => {
-  interface  IContactFormDTO{
-    id:number;
-    descricao?: string;
-    unidade_idunidade?: number;
-    valor_compra?:number;
-    valor_venda?:number;
-    quantidade:number;
-  }
+const Dashboard_venda = () => {
+    type IContactFormProps = {
+        id:number;
+        quantity?: number;
+        returnable?: boolean;
+        product_id?:number;
+        cpf?:string;
+    }
 
-  const [produtos, setProdutos] = useState<IContactFormDTO[]>([]);
+  const [vendas, setvendas] = useState<IContactFormProps[]>([]);
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState('');
     
-    const { GetAllProduto,DeletarProduto } = useAuth();
+    const { GetAllVendas, DeletarVenda,registarVendaStatus } = useAuth();
     const navigate = useNavigate();
 
     function PainelUsuario(){
@@ -28,8 +27,8 @@ const Dashboard_Produto = () => {
       navigate('/verifyUser/dashboardcliente')
     }
 
-    function CadastrarProduto(){
-      navigate('/verifyUser/cadastroProduto')
+    function RegistarVenda(){
+      navigate('/verifyUser/registrarVenda')
     }
 
     const ButtomCustomCreate = () =>{
@@ -43,7 +42,7 @@ const Dashboard_Produto = () => {
     const ButtomCustomCreateProduct = () =>{
       return(
         <div>
-          <button onClick={CadastrarProduto} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Cadastrar Produto</button>
+          <button onClick={RegistarVenda} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Fazer venda</button>
         </div>
       )
     }
@@ -58,17 +57,32 @@ const Dashboard_Produto = () => {
 
 
     const Delete = (id:number)=>{
-        DeletarProduto(id);
-
+        DeletarVenda(id);
+        if(!registarVendaStatus){
+            setTimeout(() => {
+              // Aqui você pode colocar qualquer lógica que queira executar antes do recarregamento
+              alert("Usuario DELETADO com SUCESSO");
+            
+              // Recarregar a página
+              navigate("/verifyUser/dashboard");
+            }, 2000);
+        }else{
+            setTimeout(() => {
+                // Aqui você pode colocar qualquer lógica que queira executar antes do recarregamento
+                alert("ERRO AO DELETAR USUARIO");
+              
+                // Recarregar a página
+              }, 1000);
+        }
        
     }
     useEffect(() => {
         const buscarTodosUsuarios = async () => {
             setCarregando(true);
             try {
-                const response = await GetAllProduto();
+                const response = await GetAllVendas();
                 console.log(response.data)
-                setProdutos(response.data); // Atualizar o estado com os dados recebidos
+                setvendas(response.data); // Atualizar o estado com os dados recebidos
                 setErro(''); // Limpar qualquer erro anterior
             } catch (error) {
                 setErro('Erro ao buscar usuários'); // Definir mensagem de erro
@@ -78,41 +92,36 @@ const Dashboard_Produto = () => {
         };
 
         buscarTodosUsuarios();
-    }, [GetAllProduto]);
+    }, [GetAllVendas]);
     
     return (
       <div className='container'>
         <div className="container-tabela">
-          <h3 className="text-center">Painel de Produtos</h3>
+          <h3 className="text-center">Painel de Vendas</h3>
           {carregando && <p>Carregando...</p>}
           {erro && <p>{erro}</p>}
           <table className="table"style={{ marginTop: 20 }}>
               <thead>
                   <tr>
                         <th>ID</th>
-                      <th>Descrição</th>
-                      <th>ID Unidade</th>
                       <th>Quantidade</th>
-                      <th>Valor da compra</th>
-                      <th>Valor da venda</th>
+                      <th>CPF Cliente</th>
+                      <th>ID PRODUTO</th>
+                      <th>Retornavel</th>
                   </tr>
               </thead>
               <tbody>
-                {produtos.map((produto, index) => (
+                {vendas.map((venda, index) => (
                     <tr key={index}>
-                        <td>{produto.id}</td>
-                        <td>{produto.descricao}</td>
-                        <td>{produto.unidade_idunidade}</td>
-                        <td>{produto.quantidade}</td>
-                        <td>{produto.valor_compra}</td>
-                        <td>{produto.valor_venda}</td>
+                        <td>{venda.id}</td>
+                        <td>{venda.quantity}</td>
+                        <td>{venda.cpf}</td>
+                        <td>{venda.product_id}</td>
+                        <td>{venda.returnable ? 'Yes' : 'No'}</td>
                         <td>
-                          <Link to={`/verifyUser/produto/edit/${produto.id}`} className="btn btn-primary">
-                            Edit
-                          </Link>
                         </td>
                         <td>
-                          <button onClick={() => Delete(produto.id)} className="btn btn-danger">
+                          <button onClick={() => Delete(venda.id)} className="btn btn-danger">
                             Delete
                           </button>
                         </td>
@@ -131,4 +140,4 @@ const Dashboard_Produto = () => {
   );
 };
 
-export default Dashboard_Produto;
+export default Dashboard_venda;

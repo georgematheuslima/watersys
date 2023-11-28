@@ -46,6 +46,8 @@ export const Cadastro_Usuario:React.FC = () => {
         // Recarregar a página
         navigate("/verifyUser/dashboard");
       }, 2000);
+    }else{
+      alert("Usuário não cadastrado");
     }
     
   };

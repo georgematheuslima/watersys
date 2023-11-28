@@ -21,6 +21,8 @@ type authContextData = {//
   cadastroProdutoStatus:boolean;
   cadastroClienteStatus:boolean;
   EditarClienteStatus:boolean;
+  registarVendaStatus:boolean;
+  DeleteVendaStatus:boolean;
   //---------------------usuario---------------------
 	Login:(email: string, password:string)=> void
   RegistrarUsuario:( name: string, last_name:string, email:string,password:string,phone_number:string,is_admin:boolean )=>void
@@ -66,6 +68,9 @@ export const AuthProvider:FC<childrenType> = ({children}) => {
 
   const [cadastroClienteStatus, setcadastroClienteStatus] = useState(false);
   const [EditarClienteStatus, setEditarClienteStatus] = useState(false);
+
+  const [registarVendaStatus, setRegistrarVendaStatus] = useState(false);
+  const [DeleteVendaStatus, setDeleteVendaStatus] = useState(false);
 
   //_-------------------------------------------USUARIO-------------------------------------------------//
 
@@ -341,7 +346,7 @@ const RegistrarVenda = async ( quantity: number, returnable:boolean, product_id:
     });
       console.log("Venda Registrado:"+ response.data);
   } catch (error:any) {
-      setcadastroProdutoStatus(true);
+      setRegistrarVendaStatus(true);
       console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
   }
 }
@@ -375,6 +380,7 @@ const DeletarVenda = async (vendaId: number) => {
       });
       console.log('Venda deletado com sucesso:', response.data);
   } catch (error: any) {
+    setDeleteVendaStatus(true);
       console.error('Erro ao deletar venda:', error.response ? error.response.data : error);
   }
 }
@@ -405,7 +411,9 @@ const DeletarVenda = async (vendaId: number) => {
     cadastroUserStatus,
     EditarUserStatus,
     cadastroProdutoStatus,
-    cadastroClienteStatus
+    cadastroClienteStatus,
+    registarVendaStatus,
+    DeleteVendaStatus
     }}>
         {children}
     </AuthContext.Provider>

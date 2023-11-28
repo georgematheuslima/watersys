@@ -16,7 +16,6 @@ const Dashboard = () => {
 
   const [usuarios, setUsuarios] = useState<IContactFormDTO[]>([]);
     const [carregando, setCarregando] = useState(false);
-    const [isReady, setisReady] = useState(false);
     const [erro, setErro] = useState('');
     
     const { GetAllUsuario,DeleteUsuario } = useAuth();
@@ -34,7 +33,9 @@ const Dashboard = () => {
       navigate('/verifyUser/dashboardcliente')
     }
 
-
+    function PAINELVenda(){
+      navigate('/verifyUser/dashboardVendas')
+  }
     const ButtomCustomCreate = () =>{
       return(
         <div>
@@ -58,6 +59,14 @@ const Dashboard = () => {
         </div>
       )
     }
+
+    const ButtomPAINELVendas = () =>{
+      return(
+        <div>
+          <button onClick={PAINELVenda} style={{backgroundColor:"#1b8cba"}} type="submit" className="login-button-submit">Painel de Vendas</button>
+        </div>
+    )
+  }
 
 
     const Delete = (id:number)=>{
@@ -84,17 +93,6 @@ const Dashboard = () => {
 
         buscarTodosUsuarios();
     }, [GetAllUsuario]);
-
-    setTimeout(() => {
-      if (!isReady) {
-        toastr.info(
-          "It is possible that the service is being restarted, please wait more ...",
-          "",
-          { timeOut: 8000 }
-        );
-      }
-
-    }, 2000);
 
     
     return (
@@ -139,6 +137,7 @@ const Dashboard = () => {
           <ButtomCustomCreate/>
           <ButtomCustomCreateProduct/>
           <ButtomCustomCreateCliente/>
+          <ButtomPAINELVendas/>
         </div>
       </div>
     );

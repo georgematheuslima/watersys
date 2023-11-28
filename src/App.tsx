@@ -12,6 +12,8 @@ import { Editar_Produto } from './assets/Pages/produto/edit_produto';
 import Dashboard_Cliente from './assets/Pages/client/DashboardCliente';
 import { Cadastro_Cliente } from './assets/Pages/client/cad_cliente';
 import { Edita_Cliente } from './assets/Pages/client/edit_cliente';
+import Dashboard_venda from './assets/Pages/venda/dash_venda';
+import { Registra_Vendas } from './assets/Pages/venda/cad_venda';
 
 
 export const App = () => {
@@ -32,7 +34,9 @@ export const App = () => {
             <Route path="dashboardcliente" element={<Dashboard_Cliente/>}/>
             <Route path="cadastroCliente" element={<Cadastro_Cliente/>}/>
             <Route path="cliente/edit/:clienteId" element={<Edita_Cliente/>}/>
-
+            {/* VENDA */}
+            <Route path="dashboardVendas" element={<Dashboard_venda/>}/>
+            <Route path="registrarVenda" element={<Registra_Vendas/>}/>
           </Route>
         </Routes>
       </Router>
