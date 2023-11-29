@@ -1,0 +1,11 @@
+# Use a imagem base do Python
+FROM python:3.9
+
+# Copie o código do aplicativo para o contêiner
+COPY ./app /app
+
+# Instale as dependências do aplicativo
+RUN pip install streamlit
+
+# Defina o comando para iniciar o Streamlit
+CMD ["streamlit", "run", "/app/dashboards.py", "--server.port", "8501"]

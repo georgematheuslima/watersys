@@ -1,8 +1,6 @@
 from typing import List
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
 from models.purchase_history_model import PurchaseHistoryModel
 from models.user_model import UserModel
 from schemas.purchase_history_schema import PurchaseHistorySchema

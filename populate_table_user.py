@@ -3,6 +3,7 @@ from random import randint
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from models.user_model import UserModel
 from models.address_model import AddressModel
 from models.products_model import ProductModel
@@ -158,22 +159,22 @@ async def populate_products(session):
             {
                 "descricao": "Água mineral 20L São Braz",
                 "unidade_idunidade": 1,
-                "valor_compra": 10.0,
-                "valor_venda": 15.0,
+                "valor_compra": 2.5,
+                "valor_venda": 5.0,
                 "quantidade": 100
             },
             {
                 "descricao": "Água mineral 20L Indaiá",
                 "unidade_idunidade": 2,
-                "valor_compra": 11.0,
-                "valor_venda": 16.0,
+                "valor_compra": 2.0,
+                "valor_venda": 4.5,
                 "quantidade": 150
             },
             {
                 "descricao": "Água mineral 20L Lençóis",
                 "unidade_idunidade": 2,
-                "valor_compra": 11.0,
-                "valor_venda": 16.0,
+                "valor_compra": 4.0,
+                "valor_venda": 6.0,
                 "quantidade": 150
             }
         ]
@@ -280,6 +281,7 @@ async def populate_clients(session):
 async def generate_sales_data(session):
     sales_data_list = []
     last_purchase_dates = {}
+    initial_purchase_date = datetime.strptime("2023-01-01", "%Y-%m-%d")
 
     LOGGER.info('Populating sales data')
     start_date = datetime.strptime("2023-01-01", "%Y-%m-%d")
@@ -290,63 +292,48 @@ async def generate_sales_data(session):
         "13579246801", "98765432109", "24681357901", "98765413209", "36925814701",
         "98765432091", "15926374801", "98765430192", "12345678999", "99999999999"
     ]
+    purchase_dates = {cpf: initial_purchase_date for cpf in clients_cpf}
+    base_intervals = {1: randint(7, 10), 2: randint(14, 20), 3: 21}
 
     generated_sales = 0
-    while generated_sales < 310:
-        quantity = randint(1, 3)
-        interval = 0
-        if quantity == 1:
-            interval = randint(7, 10)
-        elif quantity == 2:
-            interval = randint(14, 20)
-        else:
-            interval = 7 * quantity
+    while generated_sales < 190:
+        for cpf in clients_cpf:
+            quantity = randint(1, 3)
+            interval = base_intervals[quantity]
 
-        if current_date == start_date:
-            interval = max(interval, 7)
+            if purchase_dates[cpf] <= end_date:
+                purchase_dates[cpf] += timedelta(days=interval)
+                if purchase_dates[cpf] > end_date:
+                    purchase_dates[cpf] = end_date
 
-        current_date += timedelta(days=interval)
-
-        if current_date > end_date:
-            current_date = end_date
-
-        cpf = clients_cpf[generated_sales % len(clients_cpf)]
-
-        next_purchase_date = None
-        if cpf in last_purchase_dates:
-            last_purchase_date = last_purchase_dates[cpf]
-
-            if last_purchase_date + timedelta(days=interval) <= end_date:
-                next_purchase_date = last_purchase_date + \
-                    timedelta(days=interval)
-            else:
-                next_purchase_date = current_date
-
-        else:
-            next_purchase_date = current_date
-
-        last_purchase_dates[cpf] = next_purchase_date
-
-        if next_purchase_date:
-            date = next_purchase_date.strftime("%Y-%m-%d")
-
-            sales_record = {
-                "quantity": quantity,
-                "total_amount": quantity * 16,
-                "purchase_date": datetime.strptime(date, '%Y-%m-%d').date(),
-                "returnable": bool(randint(0, 1)),
-                "product_id": randint(1, 3),
-                "cpf": cpf
-            }
+                date = purchase_dates[cpf].strftime("%Y-%m-%d")
+                sales_record = {
+                    "quantity": quantity,
+                    "total_amount": quantity * 16,
+                    "purchase_date": datetime.strptime(date, '%Y-%m-%d').date(),
+                    "returnable": bool(randint(0, 1)),
+                    "product_id": randint(1, 3),
+                    "cpf": cpf
+                }
 
             sales_data_list.append(sales_record)
             generated_sales += 1
 
     async with session.begin():
+        products = await session.execute(select(ProductModel))
+        products = products.scalars().all()
+
         for sales_record in sales_data_list:
+            product_id = sales_record["product_id"]
+            quantity = sales_record["quantity"]
+
+            product = next(p for p in products if p.id == product_id)
+            sales_record["total_amount"] = quantity * product.valor_venda
+
             sale = SaleModel(**sales_record)
             session.add(sale)
 
+        await session.commit()
 
 async def main():
     async with async_session() as session:

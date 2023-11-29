@@ -5,8 +5,11 @@ build:
 stop:
 	sudo docker stop $(docker ps -q)
 
-remove:
-	docker rm $(docker ps -a -q)
+select-none-images:
+	docker images -f "dangling=true" -q
+
+remove-none-images:
+	docker rmi $(docker images -f "dangling=true" -q)
 
 up:
 	docker-compose up

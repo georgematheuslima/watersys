@@ -2,6 +2,7 @@ import logging
 import traceback
 from datetime import datetime
 from http import HTTPStatus
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -93,6 +94,22 @@ async def get_sales(db: AsyncSession = Depends(get_session)):
         LOGGER.info('Retrieved all sales')
         return sales
 
+@router.get('/sales/{cpf}', response_model=List[SaleAllInfo])
+async def get_sale_by_cpf(cpf: str, db: AsyncSession = Depends(get_session)):
+    LOGGER.info(f'Getting sales with CPF: {cpf}')
+    async with db as session:
+        query = select(SaleModel).filter(SaleModel.cpf == cpf)
+        result = await session.execute(query)
+        sales = result.scalars().all()
+        if sales:
+            LOGGER.info(f'Sales with CPF {cpf} retrieved successfully')
+            return [sale.__dict__ for sale in sales]
+        else:
+            LOGGER.warning(f'Sales with CPF {cpf} not found')
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail='Sales not found for the given CPF'
+            )
 
 @router.get('/sales/{sale_id}', response_model=SaleAllInfo)
 async def get_sale(sale_id: int, db: AsyncSession = Depends(get_session)):

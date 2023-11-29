@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: watersys
     ports:
       - "5432:5432"
+
   app:
     build:
       context: .
@@ -31,3 +32,15 @@ services:
     depends_on:
       - postgres
       - app
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Use o mesmo Dockerfile que você usa para o seu app principal
+    ports:
+      - "8501:8501"  # Mapeie a porta do Streamlit para o host
+    depends_on:
+      - postgres
+      - app
+      - script-executor
+    command: streamlit run /app/dashboards.py
