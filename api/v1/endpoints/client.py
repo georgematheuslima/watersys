@@ -10,7 +10,7 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import SQLAlchemyError
 
 from models.client_model import ClientModel
@@ -20,7 +20,8 @@ from schemas.client_schema import ClientSchema, ClientSchemaReturn
 from exceptions.validations import FieldWithValueLessThanZero
 from exceptions.client_exceptions import ClientAlreadyRegistered
 from exceptions.general_exceptions import ServerException
-from utils.system_messages.client.client_messages import(CLIENT_ALREADY_REGISTERED)
+from utils.system_messages.client.client_messages import (
+    CLIENT_ALREADY_REGISTERED)
 
 from core.deps import get_session
 
@@ -54,11 +55,12 @@ async def create_new_client(client: ClientSchema, db: AsyncSession = Depends(get
                     cpf=client.cpf,
                     address_id=new_address.id,
                     phone_number=client.phone_number,
-                    email=client.email
+                    email=client.email,
+                    telegram_id=client.telegram_id
                 )
 
                 session.add(new_client)
-                await session.commit()  
+                await session.commit()
                 LOGGER.info('New client was created!')
                 response_data = {"message": "Client created successfully"}
 
@@ -84,16 +86,18 @@ async def create_new_client(client: ClientSchema, db: AsyncSession = Depends(get
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": 'An error occurred'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
+
 @router.get('/clients', status_code=HTTPStatus.OK, response_model=List[ClientSchemaReturn])
 async def get_all_clients(db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info('Getting all clients')
-        
+
         async with db as session:
-            query = select(ClientModel).options(joinedload(ClientModel.client_address))
+            query = select(ClientModel).options(
+                joinedload(ClientModel.client_address))
             result = await session.execute(query)
             clients = result.scalars().all()
-            
+
             if clients:
                 clients_with_address = [
                     ClientSchemaReturn(
@@ -116,22 +120,25 @@ async def get_all_clients(db: AsyncSession = Depends(get_session)):
                     )
                     for client in clients
                 ]
-                
+
                 return clients_with_address
             else:
                 return []
     except SQLAlchemyError as e:
         LOGGER.error(f'Error fetching clients: {str(e)}')
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error with database')
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail='Internal server error with database')
     except Exception as e:
         LOGGER.error(f'Unhandled error: {str(e)}')
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error')
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail='Internal server error')
+
 
 @router.get('/client/{id}', status_code=HTTPStatus.OK, response_model=ClientSchemaReturn)
 async def get_client_by_id(client_id: int, db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info(f'Getting client by id: {client_id}')
-        
+
         async with db as session:
             client = await session.get(ClientModel, client_id)
             if client:
@@ -140,36 +147,66 @@ async def get_client_by_id(client_id: int, db: AsyncSession = Depends(get_sessio
                 return JSONResponse(content=client, status_code=HTTPStatus.OK)
             else:
                 return JSONResponse(content={"message": 'Client not found'}, status_code=HTTPStatus.NOT_FOUND)
-    
+
     except Exception as exc:
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": f'An error occurred {exc}'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+
+@router.get('/telegram/{telegram_id}', status_code=HTTPStatus.OK,
+            response_model=ClientSchemaReturn)
+async def get_client_by_telegram_id(telegram_id: int,
+                                    db: AsyncSession = Depends(get_session)):
+    try:
+        LOGGER.info(f'Getting client by telegram_id: {telegram_id}')
+
+        async with db as session:
+            client = await session.execute(select(ClientModel)
+                                           .filter(ClientModel.telegram_id == str(telegram_id)))
+
+            # Fetch the first result (if any)
+            client = client.scalar()
+
+            if client:
+                client = jsonable_encoder(client)
+                LOGGER.info(f'Client json {client}')
+                return JSONResponse(content=client, status_code=HTTPStatus.OK)
+            else:
+                return JSONResponse(content={"message": 'Client not found'},
+                                    status_code=HTTPStatus.NOT_FOUND)
+
+    except Exception as exc:
+        LOGGER.error(traceback.format_exc())
+        return JSONResponse(content={"message": f'An error occurred {exc}'},
+                            status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+
 
 @router.put('/client/{id}', status_code=HTTPStatus.OK, response_model=ClientSchema)
 async def update_client(client_id: int, client_data: ClientSchema, db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info(f'Updating client with ID: {client_id}')
-        
+
         async with db as session:
             client = await session.get(ClientModel, client_id)
             if client:
                 for field, value in client_data.model_dump().items():
                     setattr(client, field, value)
-                
+
                 await session.commit()
                 return JSONResponse(content={"message": 'Client updated successfully'}, status_code=HTTPStatus.OK)
             else:
                 return JSONResponse(content={"message": 'Client not found'}, status_code=HTTPStatus.NOT_FOUND)
-    
+
     except Exception as exc:
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": f'An error occurred{exc}'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+
 
 @router.delete('/client/{id}', status_code=HTTPStatus.OK)
 async def delete_client(client_id: int, db: AsyncSession = Depends(get_session)):
     try:
         LOGGER.info(f'Deleting client with ID: {client_id}')
-        
+
         async with db as session:
             client = await session.get(ClientModel, client_id)
             if client:
@@ -178,7 +215,7 @@ async def delete_client(client_id: int, db: AsyncSession = Depends(get_session))
                 return JSONResponse(content={"message": 'Client deleted successfully'}, status_code=HTTPStatus.OK)
             else:
                 return JSONResponse(content={"message": 'Client not found'}, status_code=HTTPStatus.NOT_FOUND)
-    
+
     except Exception as exc:
         LOGGER.error(traceback.format_exc())
         return JSONResponse(content={"message": 'An error occurred'}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)

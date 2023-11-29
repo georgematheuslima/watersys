@@ -16,7 +16,8 @@ router = APIRouter()
 async def post_article(logged_user: UserModel = Depends(get_current_user),
                        db: AsyncSession = Depends(get_session)):
 
-    new_purchase: PurchaseHistoryModel = PurchaseHistoryModel(customer=logged_user.id)
+    new_purchase: PurchaseHistoryModel = PurchaseHistoryModel(
+        customer=logged_user.id)
 
     db.add(new_purchase)
     await db.commit()
