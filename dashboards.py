@@ -30,7 +30,6 @@ def main():
             date_obj = datetime.strptime(item['purchase_date'], '%Y-%m-%d')
             unique_months.add(date_obj.strftime('%B %Y'))
 
-        # Mapeamento de nomes de meses para números
         months_mapping = {
             'January': 0,
             'February': 1,
@@ -44,7 +43,6 @@ def main():
             'October': 9
         }
 
-        # Ordene os meses usando o mapeamento
         unique_months_sorted = sorted(unique_months, 
                                     key=lambda x: (datetime.strptime(x, '%B %Y').year, months_mapping[x.split()[0]]))
 
@@ -72,27 +70,22 @@ def main():
         filtered_data = filter_data_by_month(data, selected_month)
         
         if filtered_data:
-            # Exibição dos dados filtrados em uma tabela
             st.write(f"Compras para o mês de {selected_month}:")
             st.table(filtered_data)
 
-            # Gráfico de faturamento por dia do mês
             days = extract_days_from_dates(filtered_data)
             total_amount_by_day = filter_total_amount_by_month(filtered_data, selected_month)
             fig_date = px.bar(x=days, y=total_amount_by_day, labels={'x': 'Dia do Mês', 'y': 'Faturamento'}, title="Faturamento por dia do mês")
             st.plotly_chart(fig_date)
 
-            # 1. Dia com a maior quantidade de compras
             day_max_purchases = days[total_amount_by_day.index(max(total_amount_by_day))]
             st.write(f"Dia com maior quantidade de compras: {day_max_purchases}")
 
-            # 2. Total do mês vs total acumulado até o momento
             total_current_month = sum(total_amount_by_day)
             total_until_now = sum(filter_total_amount_by_month(data, selected_month))  # Total até o momento
             fig_totals = px.bar(x=['Total do Mês', 'Total até o Momento'], y=[total_current_month, total_until_now], labels={'x': 'Total', 'y': 'Faturamento'}, title="Comparação de Totais")
             st.plotly_chart(fig_totals)
 
-            # 3. Mês com mais vendas vs total acumulado até o momento
             months_sales = {month: sum(filter_total_amount_by_month(data, month)) for month in unique_months}
             max_sales_month = max(months_sales, key=months_sales.get)
             max_sales_value = months_sales[max_sales_month]
