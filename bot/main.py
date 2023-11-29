@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import requests
 import os
 import json
+from datetime import datetime
+
 
 load_dotenv()
 base_url = 'http://localhost:8000/api/v1/'
@@ -34,9 +36,31 @@ buttons = [
     ("Encontrar depósito", "encontrar_deposito"),
     ("Histórico de compra", "historico_de_compra"),
     ("Meus dados", "client_data"),
-    ("Média de galão", "media_galao"),
+    ("Estimativa de pedido", "estimativa_pedido"),
     ("Se cadastrar", "signup"),
 ]
+
+
+def calcular_media_dias_diferenca(lista_compras):
+    # Verifica se há pelo menos 3 itens na lista
+    if len(lista_compras) < 3:
+        return "Dados insuficientes"
+
+    # Obtém as datas de compra dos três primeiros itens
+    datas_compra = [item["purchase_date"] for item in lista_compras[:3]]
+
+    # Converte as datas para objetos datetime
+    datas_datetime = [datetime.strptime(
+        data, "%Y-%m-%d") for data in datas_compra]
+
+    # Calcula a diferença em dias entre as datas
+    diferenca_dias = [(datas_datetime[i+1] - datas_datetime[i]
+                       ).days for i in range(len(datas_datetime)-1)]
+
+    # Calcula a média das diferenças
+    media_dias = sum(diferenca_dias) / len(diferenca_dias)
+
+    return media_dias
 
 
 keyboard.add(
@@ -85,7 +109,7 @@ def handle_callback(call):
             formatted_sales_history = "\n".join([
                 f"📅 Data de compra: {sale['purchase_date']}\n"
                 f"🛍 ID do Produto: {sale['product_id']}\n"
-                f"💰 Montante total: {sale['total_amount']}\n"
+                f"💰 Montante total: R$ {sale['total_amount']}\n"
                 f"🔄 Retornável: {'Sim' if sale['returnable'] else 'Não'}\n"
                 f"🔢 Quantidade: {sale['quantity']}\n"
                 f"🆔 ID: {sale['id']}\n"
@@ -95,7 +119,6 @@ def handle_callback(call):
 
             bot.send_message(chat_id, formatted_sales_history)
         else:
-            print(r.content)
             bot.send_message(chat_id, "Failed to retrieve purchase history")
 
     elif callback_data == "client_data":
@@ -103,16 +126,30 @@ def handle_callback(call):
         if client_data.status_code == 200:
             bot.send_message(
                 chat_id, json.dumps(
-                    r.json(), indent=2, ensure_ascii=False).replace('"', '')
+                    client_data.json(), indent=2, ensure_ascii=False).replace('"', '')
                 .replace('{', '============================\n')
                 .replace('}', '\n============================')
                 .replace(',', '\n')
                 .replace(':', ' ➔'))
 
         else:
-            bot.send_message(chat_id, "Ainda não cadastrado")
-    elif callback_data == "media_galao":
-        bot.send_message(chat_id, "Você selecionou 'Média de galão'")
+            bot.send_message(chat_id, 'Usuario não cadastrado')
+
+    elif callback_data == "estimativa_pedido":
+        client_cpf = get_client_data(chat_id)
+        if client_cpf.status_code == 200:
+            r = requests.get(sales_history_api + client_cpf.json()['cpf'])
+            print(r)
+            estimativa = calcular_media_dias_diferenca(r.json())
+
+            if estimativa == "Dados insuficientes":
+                bot.send_message(
+                    chat_id, "Número de pedidos insuficientes para uma estimativa")
+            bot.send_message(
+                chat_id, f'Média de dias entre os pedidos: {estimativa} Dias')
+        else:
+            bot.send_message(chat_id, 'Usuario não cadastrado')
+
     elif callback_data == "signup":
         user_data[chat_id] = {}
         inform_name(call.message)
