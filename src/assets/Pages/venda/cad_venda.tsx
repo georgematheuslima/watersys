@@ -33,7 +33,7 @@ export const Registra_Vendas:React.FC = () => {
 
   const onSubmit = (data: IContactFormProps) => {
     RegistrarVenda(Number(data.quantity), Boolean(data.returnable),Number(data.product_id), String(data.cpf))
-  
+   
     if(!registarVendaStatus){
         setTimeout(() => {
           // Aqui você pode colocar qualquer lógica que queira executar antes do recarregamento

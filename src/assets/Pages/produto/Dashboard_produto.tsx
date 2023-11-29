@@ -58,8 +58,11 @@ const Dashboard_Produto = () => {
 
 
     const Delete = (id:number)=>{
-        DeletarProduto(id);
+      DeletarProduto(id);
 
+      setTimeout(()=>{
+        window.location.reload();
+     },2000)
        
     }
     useEffect(() => {

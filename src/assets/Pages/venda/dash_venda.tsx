@@ -22,7 +22,10 @@ const Dashboard_venda = () => {
     function PainelUsuario(){
         navigate('/verifyUser/dashboard')
     }
-    
+    function DashVendas(){
+      window.open('http://localhost:8501/', '_blank');
+    }
+
     function PainelCliente(){
       navigate('/verifyUser/dashboardcliente')
     }
@@ -55,6 +58,13 @@ const Dashboard_venda = () => {
       )
     }
 
+    const DashGraficos = () =>{
+      return(
+        <div>
+          <button onClick={DashVendas} style={{backgroundColor:"#1bba43"}} type="submit" className="login-button-submit">Acompanhar dados de Venda</button>
+        </div>
+      )
+    }
 
     const Delete = (id:number)=>{
         DeletarVenda(id);
@@ -135,6 +145,7 @@ const Dashboard_venda = () => {
           <ButtomCustomCreate/>
           <ButtomCustomCreateProduct/>
           <ButtomCustomCreateCliente/>
+          <DashGraficos/>
         </div>
     </div>
   );

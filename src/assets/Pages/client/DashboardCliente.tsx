@@ -85,6 +85,9 @@ type Iaddress={
 
     const Delete = (id:number)=>{
         DeletarCliente(id);
+        setTimeout(()=>{
+          window.location.reload();
+       },2000)
     }
 
     useEffect(() => {
