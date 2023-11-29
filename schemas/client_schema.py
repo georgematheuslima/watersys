@@ -1,5 +1,7 @@
 from schemas.address_schema import AddressSchema
 from pydantic import BaseModel
+from typing import Optional
+
 
 class ClientSchema(BaseModel):
     client_first_name: str
@@ -8,6 +10,8 @@ class ClientSchema(BaseModel):
     address: AddressSchema
     phone_number: str
     email: str
+    telegram_id: Optional[str] = None
+
 
 class ClientSchemaReturn(BaseModel):
     id: int
@@ -17,3 +21,4 @@ class ClientSchemaReturn(BaseModel):
     address: AddressSchema
     phone_number: str
     email: str
+    telegram_id: Optional[str] = None

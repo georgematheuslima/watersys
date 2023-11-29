@@ -37,18 +37,18 @@ async def post_user(user: UserSchemaCreate,
     LOGGER.info(f'Iniciando o registro de usuário {user}')
     try:
         new_user = UserModel(name=user.name,
-                         last_name=user.last_name,
-                         email=user.email,
-                         phone_number=user.phone_number,
-                         passwd=generate_hast_pass(user.passwd),
-                         is_admin=user.is_admin)
+                             last_name=user.last_name,
+                             email=user.email,
+                             phone_number=user.phone_number,
+                             passwd=generate_hast_pass(user.passwd),
+                             is_admin=user.is_admin)
 
         async with db as session:
             try:
                 LOGGER.info('Registrando usuário no banco de dados')
                 session.add(new_user)
                 await session.commit()
-                
+
                 LOGGER.info('Usuário registrado com sucesso')
                 return new_user
             except IntegrityError as exc:
@@ -58,10 +58,11 @@ async def post_user(user: UserSchemaCreate,
                                     detail='Usuário com o mesmo email já existente')
 
     except Exception as exc:
-            LOGGER.error(traceback.format_exc())
-            LOGGER.error(f'Erro interno ao criar usuário: {exc}', exc_info=True)
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail='Erro interno ao processar a requisição')
+        LOGGER.error(traceback.format_exc())
+        LOGGER.error(f'Erro interno ao criar usuário: {exc}', exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='Erro interno ao processar a requisição')
+
 
 @router.get('/', response_model=List[UserSchemaBaseReturn])
 async def get_users(db: AsyncSession = Depends(get_session)):
@@ -74,13 +75,15 @@ async def get_users(db: AsyncSession = Depends(get_session)):
 
             return users
     except SQLAlchemyError as db_error:
-        LOGGER.error(f'Erro no banco de dados ao buscar usuários: {db_error}', exc_info=True)
+        LOGGER.error(
+            f'Erro no banco de dados ao buscar usuários: {db_error}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro no banco de dados ao buscar usuários')
     except Exception as e:
         LOGGER.error(f'Erro em get_users: {e}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro interno ao processar a requisição')
+
 
 @router.get('/{user_id}',
             response_model=UserSchemaPurchases,
@@ -99,7 +102,8 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_session)):
                 raise HTTPException(detail='Usuario não encontrado',
                                     status_code=HTTPStatus.NOT_FOUND)
     except SQLAlchemyError as db_error:
-        LOGGER.error(f'Erro no banco de dados ao buscar usuário: {db_error}', exc_info=True)
+        LOGGER.error(
+            f'Erro no banco de dados ao buscar usuário: {db_error}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro no banco de dados ao buscar usuário')
     except Exception as e:
@@ -140,13 +144,15 @@ async def put_user(user_id: int,
                 raise HTTPException(detail='Usuario não encontrado',
                                     status_code=HTTPStatus.NOT_FOUND)
     except SQLAlchemyError as db_error:
-        LOGGER.error(f'Erro no banco de dados ao atualizar usuário: {db_error}', exc_info=True)
+        LOGGER.error(
+            f'Erro no banco de dados ao atualizar usuário: {db_error}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro no banco de dados ao atualizar usuário')
     except Exception as e:
         LOGGER.error(f'Erro em put_user: {e}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro interno ao processar a requisição')
+
 
 @router.delete('/{user_id}', status_code=HTTPStatus.NO_CONTENT)
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_session)):
@@ -165,13 +171,16 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_session)):
                 raise HTTPException(detail='Usuario não encontrado',
                                     status_code=HTTPStatus.NOT_FOUND)
     except SQLAlchemyError as db_error:
-        LOGGER.error(f'Erro no banco de dados ao deletar usuário: {db_error}', exc_info=True)
+        LOGGER.error(
+            f'Erro no banco de dados ao deletar usuário: {db_error}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro no banco de dados ao deletar usuário')
     except Exception as e:
         LOGGER.error(f'Erro em delete_user: {e}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro interno ao processar a requisição')
+
+
 @router.post('/login')
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: AsyncSession = Depends(get_session)):
@@ -187,7 +196,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                                      'token_type': 'Bearer'},
                             status_code=HTTPStatus.OK)
     except SQLAlchemyError as db_error:
-        LOGGER.error(f'Erro no banco de dados ao fazer login: {db_error}', exc_info=True)
+        LOGGER.error(
+            f'Erro no banco de dados ao fazer login: {db_error}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Erro no banco de dados ao fazer login')
     except Exception as e:

@@ -24,19 +24,23 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
     LOGGER.info(f'Starting creation of a new sale: {sale}')
     try:
         async with db as session:
-            client_query = select(ClientModel).where(ClientModel.cpf == str(sale.cpf))
+            client_query = select(ClientModel).where(
+                ClientModel.cpf == str(sale.cpf))
             client = await session.execute(client_query)
             found_client = client.scalars().first()
 
             if not found_client:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Client not found')
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND, detail='Client not found')
 
-            product_query = select(ProductModel).where(ProductModel.id == sale.product_id)
+            product_query = select(ProductModel).where(
+                ProductModel.id == sale.product_id)
             product = await session.execute(product_query)
             found_product = product.scalars().first()
 
             if not found_product:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Product not found')
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND, detail='Product not found')
 
             if found_product.quantidade < sale.quantity:
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST,
@@ -71,12 +75,13 @@ async def create_sale(sale: SaleCreate, db: AsyncSession = Depends(get_session))
                             detail='Integrity error creating sale')
     except HTTPException as exc:
         LOGGER.error(f'Error creating sale: {exc.detail}')
-        raise  
+        raise
     except Exception as exc:
         LOGGER.error(traceback.format_exc())
         LOGGER.error(f'Internal error creating sale: {exc}', exc_info=True)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail='Internal error processing request')
+
 
 @router.get('/sales', response_model=list[SaleAllInfo])
 async def get_sales(db: AsyncSession = Depends(get_session)):
@@ -103,6 +108,18 @@ async def get_sale(sale_id: int, db: AsyncSession = Depends(get_session)):
             LOGGER.warning(f'Sale with ID {sale_id} not found')
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
                                 detail='Sale not found')
+
+
+@router.get('/telegram/{client_cpf}', response_model=list[SaleAllInfo])
+async def get_sale_by_cpf(client_cpf: str, db: AsyncSession = Depends(get_session)):
+    LOGGER.info(f'Getting sale with ID: {client_cpf}')
+    async with db as session:
+        query = select(SaleModel).filter(SaleModel.cpf == client_cpf)
+        print(query)
+        result = await session.execute(query)
+        sales = result.scalars().unique().all()
+        LOGGER.info('Retrieved all sales')
+        return sales
 
 
 @router.delete('/sales/{sale_id}', response_model=SaleAllInfo)

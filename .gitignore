@@ -8,4 +8,5 @@ mongodb
 logs
 .env
 database
+env
 
